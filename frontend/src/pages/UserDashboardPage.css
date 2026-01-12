@@ -1,0 +1,457 @@
+/* Dashboard Styles - Inspired by the provided design */
+.dashboard-modern {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 24px;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Header Section */
+.dashboard-header-section {
+  position: relative;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.dashboard-header-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.dashboard-header-section::after {
+  content: '';
+  position: absolute;
+  top: 100px;
+  right: 100px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  filter: blur(30px);
+}
+
+.dashboard-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(30, 58, 138, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #1e3a8a;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.dashboard-back-button:hover {
+  background: rgba(30, 58, 138, 0.2);
+  transform: translateX(-2px);
+}
+
+.dashboard-progress {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.dashboard-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0 0 24px 0;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-start-button {
+  background: #0066ff;
+  color: #ffffff;
+  border: none;
+  padding: 14px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.dashboard-start-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 102, 255, 0.4);
+  background: #0052cc;
+}
+
+.dashboard-watch-link {
+  color: #0066ff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.dashboard-watch-link:hover {
+  color: #0052cc;
+  text-decoration: underline;
+}
+
+/* Feature Cards Section */
+.dashboard-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.dashboard-feature-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dashboard-feature-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-feature-card.peach {
+  background: #ffe5d4;
+}
+
+.dashboard-feature-card.lavender {
+  background: #e8e0ff;
+}
+
+.dashboard-feature-card.blue {
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.dashboard-feature-icon {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-feature-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.dashboard-feature-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+  flex: 1;
+}
+
+.dashboard-feature-card.blue .dashboard-feature-text {
+  color: #ffffff;
+}
+
+/* Stats Section */
+.dashboard-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.dashboard-stat-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.dashboard-stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 4px;
+}
+
+.dashboard-stat-label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Bookings Section */
+.dashboard-bookings-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.dashboard-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.dashboard-bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-booking-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.dashboard-booking-item:hover {
+  border-color: #0066ff;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.1);
+}
+
+.dashboard-booking-content {
+  flex: 1;
+}
+
+.dashboard-booking-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.dashboard-booking-meta {
+  font-size: 14px;
+  color: #64748b;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dashboard-booking-status {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.dashboard-booking-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.dashboard-booking-status.completed {
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.dashboard-booking-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Profile Section */
+.dashboard-profile-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.dashboard-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.dashboard-profile-content {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.dashboard-profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.dashboard-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dashboard-profile-info {
+  flex: 1;
+}
+
+.dashboard-profile-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.dashboard-profile-email {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.dashboard-profile-role {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e0f2fe;
+  color: #0c4a6e;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* Quick Actions */
+.dashboard-quick-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.dashboard-action-button {
+  padding: 10px 20px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.dashboard-action-button:hover {
+  border-color: #0066ff;
+  color: #0066ff;
+  background: #f0f9ff;
+}
+
+.dashboard-action-button.primary {
+  background: #0066ff;
+  color: #ffffff;
+  border-color: #0066ff;
+}
+
+.dashboard-action-button.primary:hover {
+  background: #0052cc;
+  border-color: #0052cc;
+}
+
+/* Empty States */
+.dashboard-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #64748b;
+}
+
+.dashboard-empty-state h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.dashboard-empty-state p {
+  margin-bottom: 20px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard-modern {
+    padding: 16px;
+  }
+
+  .dashboard-header-section {
+    padding: 24px;
+  }
+
+  .dashboard-title {
+    font-size: 28px;
+  }
+
+  .dashboard-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dashboard-start-button {
+    width: 100%;
+  }
+
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-profile-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .dashboard-booking-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

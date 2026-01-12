@@ -1,0 +1,359 @@
+/* Creator Dashboard Styles - Matching the modern design */
+.creator-dashboard-modern {
+  min-height: 100vh;
+  background: #ffffff;
+  padding: 24px;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Header Section */
+.creator-header-section {
+  position: relative;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border-radius: 24px;
+  padding: 32px;
+  margin-bottom: 32px;
+  overflow: hidden;
+}
+
+.creator-header-section::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  filter: blur(40px);
+}
+
+.creator-header-section::after {
+  content: '';
+  position: absolute;
+  top: 100px;
+  right: 100px;
+  width: 150px;
+  height: 150px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  filter: blur(30px);
+}
+
+.creator-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(30, 58, 138, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #1e3a8a;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.creator-back-button:hover {
+  background: rgba(30, 58, 138, 0.2);
+  transform: translateX(-2px);
+}
+
+.creator-title {
+  font-size: 36px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.02em;
+}
+
+.creator-subtitle {
+  font-size: 16px;
+  color: #475569;
+  margin: 0;
+}
+
+/* Form Section */
+.creator-form-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.creator-form-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 20px 0;
+}
+
+.creator-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.creator-form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.creator-form-input {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.creator-form-input:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+
+.creator-form-textarea {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.creator-form-textarea:focus {
+  outline: none;
+  border-color: #0066ff;
+}
+
+.creator-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.creator-form-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.creator-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.creator-button-primary {
+  background: #0066ff;
+  color: #ffffff;
+}
+
+.creator-button-primary:hover {
+  background: #0052cc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+}
+
+.creator-button-secondary {
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.creator-button-secondary:hover {
+  border-color: #0066ff;
+  color: #0066ff;
+}
+
+/* Sessions List */
+.creator-sessions-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.creator-section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.creator-sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creator-session-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.creator-session-item:hover {
+  border-color: #0066ff;
+  box-shadow: 0 2px 8px rgba(0, 102, 255, 0.1);
+  transform: translateX(4px);
+}
+
+.creator-session-content {
+  flex: 1;
+}
+
+.creator-session-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.creator-session-meta {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.creator-session-price {
+  padding: 8px 16px;
+  background: #e0f2fe;
+  color: #0c4a6e;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* Bookings List */
+.creator-bookings-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.creator-booking-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.creator-booking-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.creator-booking-meta {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.creator-booking-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.creator-booking-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.creator-booking-status.completed {
+  background: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.creator-booking-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* Alert Messages */
+.creator-alert {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.creator-alert-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.creator-alert-success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.creator-alert-info {
+  background: #e0f2fe;
+  color: #0c4a6e;
+  border: 1px solid #bae6fd;
+}
+
+/* Empty State */
+.creator-empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .creator-dashboard-modern {
+    padding: 16px;
+  }
+
+  .creator-header-section {
+    padding: 24px;
+  }
+
+  .creator-title {
+    font-size: 28px;
+  }
+
+  .creator-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .creator-form-actions {
+    flex-direction: column;
+  }
+
+  .creator-button {
+    width: 100%;
+  }
+}
