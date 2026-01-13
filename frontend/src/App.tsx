@@ -11,6 +11,7 @@ import { SessionDetailPage } from './pages/SessionDetailPage'
 import { UserDashboardPage } from './pages/UserDashboardPage'
 import { UserProfilePage } from './pages/UserProfilePage'
 import { ExploreSessionsPage } from './pages/ExploreSessionsPage'
+import { SettingsPage } from './pages/SettingsPage'
 
 function App() {
   return (
@@ -37,6 +38,15 @@ function App() {
           element={
             <ProtectedRoute>
               <UserProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <SettingsPage />
             </ProtectedRoute>
           }
         />

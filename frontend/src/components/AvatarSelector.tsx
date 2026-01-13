@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { FaCheck } from 'react-icons/fa'
 import './AvatarSelector.css'
 
 const AVATARS = [
@@ -33,7 +33,7 @@ export function AvatarSelector({ selectedAvatar, onSelectAvatar }: AvatarSelecto
             aria-label={`Select avatar ${avatar.split('/').pop()}`}
           >
             <img src={avatar} alt={`Avatar ${avatar.split('/').pop()}`} />
-            {selectedAvatar === avatar && <div className="avatar-checkmark">✓</div>}
+            {selectedAvatar === avatar && <div className="avatar-checkmark"><FaCheck /></div>}
           </button>
         ))}
       </div>

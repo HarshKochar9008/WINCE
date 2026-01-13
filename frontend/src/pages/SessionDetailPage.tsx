@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import { loadStripe } from '@stripe/stripe-js'
+import { FaCheckCircle, FaHourglassHalf, FaTimesCircle } from 'react-icons/fa'
 
 export function SessionDetailPage() {
   const { id } = useParams()
@@ -176,10 +177,20 @@ export function SessionDetailPage() {
 
           {existingBooking && (
             <div className="card subtle" style={{ backgroundColor: existingBooking.status === 'CONFIRMED' ? '#d4edda' : '#fff3cd', padding: '16px', marginBottom: '16px' }}>
-              <strong>
-                {existingBooking.status === 'CONFIRMED' ? '✅ Already Booked' : 
-                 existingBooking.status === 'PENDING' ? '⏳ Booking Pending' : 
-                 '❌ Booking Cancelled'}
+              <strong style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {existingBooking.status === 'CONFIRMED' ? (
+                  <>
+                    <FaCheckCircle style={{ color: '#28a745' }} /> Already Booked
+                  </>
+                ) : existingBooking.status === 'PENDING' ? (
+                  <>
+                    <FaHourglassHalf style={{ color: '#ffc107' }} /> Booking Pending
+                  </>
+                ) : (
+                  <>
+                    <FaTimesCircle style={{ color: '#dc3545' }} /> Booking Cancelled
+                  </>
+                )}
               </strong>
               <div style={{ marginTop: '8px', fontSize: '14px' }}>
                 Status: <strong>{existingBooking.status}</strong>

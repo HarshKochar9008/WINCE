@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import './UserDashboardPage.css'
-import { FaArrowLeft, FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes } from 'react-icons/fa'
+import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes, FaBars } from 'react-icons/fa'
 import { loadStripe } from '@stripe/stripe-js'
 import { SessionCalendar } from '../components/SessionCalendar'
+import { Sidebar } from '../components/Sidebar'
 
 export function UserDashboardPage() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export function UserDashboardPage() {
   const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
   const [paymentError, setPaymentError] = useState<{ [key: number]: string }>({})
   const [showCalendar, setShowCalendar] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -72,6 +74,8 @@ export function UserDashboardPage() {
     }
   }, [apiFetch])
 
+
+
   const { activeBookings, pastBookings } = useMemo(() => {
     const now = new Date()
     const active: Booking[] = []
@@ -88,9 +92,6 @@ export function UserDashboardPage() {
 
     return { activeBookings: active, pastBookings: past }
   }, [bookings])
-
-  const progressDay = Math.min(activeBookings.length + pastBookings.length, 14)
-  const progressTotal = 14
 
   function formatSessionTitle(booking: Booking) {
     const session = typeof booking.session === 'object' ? booking.session : null
@@ -150,22 +151,29 @@ export function UserDashboardPage() {
   }
 
   return (
-    <div className="dashboard-modern">
-      <div className="dashboard-container-box">
-        <div className="dashboard-header-section">
-          <button className="dashboard-back-button" onClick={() => navigate('/')} aria-label="Go back">
-            <FaArrowLeft />
-          </button>
-          <h1 className="dashboard-title">Your Journey</h1>
-          <div className="dashboard-header-actions">
-            <button className="dashboard-start-button" onClick={() => navigate('/explore')}>
-              Start
-            </button>
-            <a href="#" className="dashboard-watch-link" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>
-              Explore sessions
-            </a>
+    <div className="dashboard-with-sidebar">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="dashboard-modern">
+        <div className="dashboard-container-box">
+          <div className="dashboard-header-section">
+            <div className="dashboard-header-content">
+              <button 
+                className="sidebar-toggle-btn"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open menu"
+              >
+                <FaBars />
+              </button>
+              <div className="dashboard-header-text">
+                <h1 className="dashboard-title">Dashboard</h1>
+                <p className="dashboard-subtitle">Hi, {user?.name}</p>
+              </div>
+              <button className="dashboard-start-button" onClick={() => navigate('/explore')}>
+                Book Now
+              </button>
+            </div>
           </div>
-        </div>
 
         <div className="dashboard-features">
           <Link to="/explore" className="dashboard-feature-card peach">
@@ -192,13 +200,13 @@ export function UserDashboardPage() {
           </Link>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' , marginTop: '32px' }} className="dashboard-stats-grid">
+        <div className="dashboard-stats-grid">
           <div className="dashboard-stat-card">
-            <div style={{ fontSize: '36px', fontWeight: 800, color: '#1e3a8a', marginBottom: '8px' }} className="dashboard-stat-value">{activeBookings.length}</div>
+            <div className="dashboard-stat-value">{activeBookings.length}</div>
             <div className="dashboard-stat-label">Active Bookings</div>
           </div>
           <div className="dashboard-stat-card">
-            <div style={{ fontSize: '36px', fontWeight: 800, color: '#1e3a8a', marginBottom: '8px' }} className="dashboard-stat-value">{pastBookings.length}</div>
+            <div className="dashboard-stat-value">{pastBookings.length}</div>
             <div className="dashboard-stat-label">Completed</div>
           </div>
           <div className="dashboard-stat-card">
@@ -224,7 +232,7 @@ export function UserDashboardPage() {
           {isLoading ? (
             <div className="dashboard-empty-state">Loading bookings…</div>
           ) : error ? (
-            <div className="dashboard-empty-state" style={{ color: '#dc2626' }}>Error: {error}</div>
+            <div className="dashboard-empty-state dashboard-error-state">Error: {error}</div>
           ) : (
             <div className="dashboard-bookings-list">
               {activeBookings.map((b) => {
@@ -236,7 +244,7 @@ export function UserDashboardPage() {
                     <div className="dashboard-booking-content">
                       <div className="dashboard-booking-title">
                         {session ? (
-                          <Link to={`/sessions/${session.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <Link to={`/sessions/${session.id}`}>
                             {formatSessionTitle(b)}
                           </Link>
                         ) : (
@@ -251,16 +259,15 @@ export function UserDashboardPage() {
                         {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
                       </div>
                       {paymentError[b.id] && (
-                        <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '8px' }}>
+                        <div className="dashboard-payment-error">
                           {paymentError[b.id]}
                         </div>
                       )}
                       {isPending && (
-                        <button
+                        <button style={{ marginTop: '30px' }}
                           className="dashboard-action-button primary"
                           onClick={() => handlePayment(b)}
                           disabled={paymentLoading === b.id}
-                          style={{ marginTop: '12px' }}
                         >
                           {paymentLoading === b.id ? 'Processing...' : 'Pay Now'}
                         </button>
@@ -302,7 +309,7 @@ export function UserDashboardPage() {
                       {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
                     </div>
                     {paymentError[b.id] && (
-                      <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '8px' }}>
+                      <div className="dashboard-payment-error">
                         {paymentError[b.id]}
                       </div>
                     )}
@@ -311,7 +318,6 @@ export function UserDashboardPage() {
                         className="dashboard-action-button primary"
                         onClick={() => handlePayment(b)}
                         disabled={paymentLoading === b.id}
-                        style={{ marginTop: '12px' }}
                       >
                         {paymentLoading === b.id ? 'Processing...' : 'Pay Now'}
                       </button>
@@ -328,7 +334,7 @@ export function UserDashboardPage() {
         <div className="dashboard-empty-state">
           <h3>No bookings yet</h3>
           <p>Start exploring and book your first session!</p>
-          <Link to="/explore" className="dashboard-action-button primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+          <Link to="/explore" className="dashboard-action-button primary dashboard-empty-cta">
             Browse Sessions
           </Link>
         </div>
@@ -353,6 +359,7 @@ export function UserDashboardPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

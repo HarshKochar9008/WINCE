@@ -1,10 +1,11 @@
 .session-calendar {
   width: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 24px;
-  padding: 32px;
-  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-  margin: 32px 0;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  margin: 24px 0;
+  border: 1px solid #e5e7eb;
 }
 
 /* Header */
@@ -24,8 +25,8 @@
 }
 
 .calendar-title {
-  color: white;
-  font-size: 28px;
+  color: #111827;
+  font-size: 22px;
   font-weight: 700;
   margin: 0;
   display: flex;
@@ -38,21 +39,19 @@
 }
 
 .calendar-today-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  color: #111827;
   padding: 8px 20px;
-  border-radius: 12px;
+  border-radius: 999px;
   cursor: pointer;
   font-weight: 600;
   font-size: 14px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
 }
 
 .calendar-today-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: #e5e7eb;
 }
 
 .calendar-nav {
@@ -62,7 +61,7 @@
 }
 
 .calendar-current-month {
-  color: white;
+  color: #111827;
   font-size: 20px;
   font-weight: 600;
   min-width: 180px;
@@ -70,9 +69,9 @@
 }
 
 .calendar-nav-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: #f3f4f6;
   border: none;
-  color: white;
+  color: #111827;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -80,13 +79,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .calendar-nav-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: scale(1.1);
+  background: #e5e7eb;
+  transform: translateY(-1px);
 }
 
 /* Legend */
@@ -101,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: white;
+  color: #4b5563;
   font-size: 14px;
   font-weight: 500;
 }
@@ -114,28 +112,26 @@
 }
 
 .legend-dot.booked {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 2px 8px rgba(245, 87, 108, 0.4);
+  background: #ef4444;
 }
 
 .legend-dot.available {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 2px 8px rgba(79, 172, 254, 0.4);
+  background: #10b981;
 }
 
 /* Calendar Grid */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 4px;
+  background: #f9fafb;
   padding: 16px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
 }
 
 .calendar-day-name {
-  color: rgba(255, 255, 255, 0.9);
+  color: #6b7280;
   font-weight: 700;
   font-size: 14px;
   text-align: center;
@@ -145,21 +141,20 @@
 }
 
 .calendar-day {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 8px;
   min-height: 120px;
   padding: 8px;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
   cursor: default;
 }
 
 .calendar-day:hover {
-  background: white;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background: #f9fafb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .calendar-day.empty {
@@ -173,19 +168,19 @@
 }
 
 .calendar-day.today {
-  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-  box-shadow: 0 4px 16px rgba(252, 182, 159, 0.4);
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #bfdbfe;
 }
 
 .calendar-day.today .day-number {
-  color: #e74c3c;
+  color: #1d4ed8;
   font-weight: 800;
 }
 
 .day-number {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  color: #2c3e50;
+  color: #111827;
   margin-bottom: 4px;
 }
 
@@ -198,34 +193,31 @@
 }
 
 .event-pill {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #e5e7eb;
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.15s ease;
   overflow: hidden;
 }
 
 .event-pill.booked {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 2px 8px rgba(245, 87, 108, 0.3);
+  background: #fee2e2;
 }
 
 .event-pill.available {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+  background: #dcfce7;
 }
 
 .event-pill:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  background: #e5e7eb;
 }
 
 .event-time {
   display: block;
   font-size: 10px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: #4b5563;
   margin-bottom: 2px;
 }
 
@@ -233,7 +225,7 @@
   display: block;
   font-size: 11px;
   font-weight: 600;
-  color: white;
+  color: #111827;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -262,11 +254,11 @@
 }
 
 .indicator.booked {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: #ef4444;
 }
 
 .indicator.available {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  background: #10b981;
 }
 
 /* Event Modal */
@@ -276,7 +268,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(15, 23, 42, 0.55);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -297,14 +289,14 @@
 
 .event-modal {
   background: white;
-  border-radius: 24px;
+  border-radius: 16px;
   max-width: 500px;
   width: 100%;
   max-height: 90vh;
   overflow-y: auto;
   position: relative;
   animation: slideUp 0.3s ease;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
 }
 
 @keyframes slideUp {
@@ -322,13 +314,13 @@
   position: absolute;
   top: 16px;
   right: 16px;
-  background: rgba(0, 0, 0, 0.1);
+  background: #f3f4f6;
   border: none;
-  color: #2c3e50;
+  color: #111827;
   font-size: 32px;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: 999px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -340,8 +332,7 @@
 }
 
 .modal-close:hover {
-  background: rgba(0, 0, 0, 0.2);
-  transform: rotate(90deg);
+  background: #e5e7eb;
 }
 
 .modal-image {
@@ -373,19 +364,19 @@
 }
 
 .modal-badge.booked {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  color: white;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .modal-badge.available {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  color: white;
+  background: #dcfce7;
+  color: #047857;
 }
 
 .modal-title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 800;
-  color: #2c3e50;
+  color: #111827;
   margin: 0 0 24px 0;
 }
 
@@ -401,11 +392,11 @@
   align-items: center;
   gap: 12px;
   font-size: 15px;
-  color: #34495e;
+  color: #4b5563;
 }
 
 .modal-detail-item svg {
-  color: #667eea;
+  color: #2563eb;
   font-size: 18px;
 }
 
@@ -426,33 +417,32 @@
 }
 
 .modal-action-btn.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #2563eb;
   color: white;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
 }
 
 .modal-action-btn.primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+  background: #1d4ed8;
 }
 
 .modal-action-btn.secondary {
-  background: #ecf0f1;
-  color: #2c3e50;
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .modal-action-btn.secondary:hover {
-  background: #d5dbdd;
+  background: #e5e7eb;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .session-calendar {
-    padding: 24px;
+    padding: 20px;
   }
 
   .calendar-title {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .calendar-day {

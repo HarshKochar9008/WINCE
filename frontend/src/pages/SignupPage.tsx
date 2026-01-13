@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import { AvatarSelector } from '../components/AvatarSelector'
+import { UserDashboardPage } from './UserDashboardPage'
 
 export function SignupPage() {
   const { register, googleLogin, githubLogin, user } = useAuth()
@@ -147,27 +148,9 @@ export function SignupPage() {
     window.location.href = githubAuthUrl
   }
 
-  // Redirect if already logged in
   if (user) {
     return (
-      <div className="login-container">
-        <div className="login-card">
-          <div className="login-header">
-            <h1>You're already signed in</h1>
-            <p className="muted">You can access your dashboard or profile from the menu above.</p>
-          </div>
-          <div className="login-content">
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '24px' }}>
-              <Link to="/dashboard" className="btn btn-primary">
-                Go to Dashboard
-              </Link>
-              <Link to="/profile" className="btn btn-secondary">
-                View Profile
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+<UserDashboardPage /> 
     )
   }
 

@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import { AvatarSelector } from '../components/AvatarSelector'
+import { Sidebar } from '../components/Sidebar'
+import { FaArrowLeft, FaBars } from 'react-icons/fa'
 import './UserProfilePage.css'
 
 export function UserProfilePage() {
@@ -12,6 +14,7 @@ export function UserProfilePage() {
   const [profileError, setProfileError] = useState<string | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -57,14 +60,26 @@ export function UserProfilePage() {
   const avatarSrc = profileAvatar?.startsWith('/') ? profileAvatar : `/${profileAvatar}`
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <div className="profile-header">
-          <button className="profile-back-button" onClick={() => navigate(-1)}>
-            ← Back
-          </button>
-          <h1 className="profile-title">My Profile</h1>
-        </div>
+    <div className="profile-with-sidebar">
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      <div className="profile-page">
+        <div className="profile-container">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }} className="profile-header">
+            <button 
+              className="sidebar-toggle-btn"
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+              style={{ marginRight: '12px' }}
+            >
+              <FaBars />
+            </button>
+            <button className="profile-back-button" onClick={() => navigate(-1)}>
+              <FaArrowLeft />
+            </button>
+            <h1 className="profile-title">My Profile</h1>
+            <p className="profile-greeting">Hi, {user?.name}</p>
+          </div>
 
         <div className="profile-card">
           {!isEditing ? (
@@ -149,6 +164,7 @@ export function UserProfilePage() {
             </form>
           )}
         </div>
+      </div>
       </div>
     </div>
   )

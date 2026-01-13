@@ -1,7 +1,15 @@
+.profile-with-sidebar {
+  display: flex;
+  min-height: 100vh;
+}
+
 .profile-page {
   min-height: 100vh;
   background: #f8fafc;
   padding: 24px;
+  margin-left: 280px;
+  width: 100%;
+  transition: margin-left 0.3s ease;
 }
 
 .profile-container {
@@ -11,6 +19,21 @@
 
 .profile-header {
   margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-greeting {
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.sidebar-toggle-btn {
+  display: none;
 }
 
 .profile-back-button {
@@ -26,7 +49,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  margin-bottom: 16px;
 }
 
 .profile-back-button:hover {
@@ -252,9 +274,37 @@
   cursor: not-allowed;
 }
 
+@media (max-width: 1024px) {
+  .profile-page {
+    margin-left: 0;
+  }
+
+  .sidebar-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: #ffffff;
+    color: #4b5563;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+  }
+
+  .sidebar-toggle-btn:hover {
+    background: #f8fafc;
+    color: #2563eb;
+  }
+}
+
 @media (max-width: 768px) {
   .profile-page {
     padding: 16px;
+    margin-left: 0;
   }
 
   .profile-card {

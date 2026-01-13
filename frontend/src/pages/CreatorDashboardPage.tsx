@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import './CreatorDashboardPage.css'
-import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes } from 'react-icons/fa'
+import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes, FaArrowLeft, FaEdit, FaTrash } from 'react-icons/fa'
 import { CreatorSessionCalendar } from '../components/CreatorSessionCalendar'
 
 function minutesToDuration(minutes: number) {
@@ -166,7 +166,7 @@ export function CreatorDashboardPage() {
       {/* Header Section */}
       <div className="creator-header-section">
         <button className="creator-back-button" onClick={() => navigate(-1)}>
-          ←
+          <FaArrowLeft />
         </button>
         <h1 className="creator-title">Creator Dashboard</h1>
         <p className="creator-subtitle">Create sessions and manage your bookings</p>
@@ -351,14 +351,14 @@ export function CreatorDashboardPage() {
                     }}
                     title="Edit title"
                   >
-                    ✏️
+                    <FaEdit />
                   </button>
                   <button
                     className="creator-action-btn creator-action-btn-delete"
                     onClick={() => deleteSession(s.id)}
                     title="Delete session"
                   >
-                    🗑️
+                    <FaTrash />
                   </button>
                 </div>
               </div>

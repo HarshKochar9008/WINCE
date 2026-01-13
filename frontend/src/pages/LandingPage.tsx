@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { FaArrowRight } from 'react-icons/fa'
 import './LandingPage.css'
 
 export function LandingPage() {
@@ -32,6 +33,10 @@ export function LandingPage() {
           </header>
 
           <section ref={heroRef} className={`hero-section ${isVisible ? 'visible' : ''}`}>
+              {/* Decorative background elements */}
+              <img src="/images/g108.png" alt="" className="decorative-cloud" />
+              <img src="/images/g110.png" alt="" className="decorative-cloud1" />
+              <img src="/images/path114.png" alt="" className="decorative-circle" />
 
               <div className="hero-content" >
 
@@ -45,7 +50,7 @@ export function LandingPage() {
                   <div className="hero-cta">
                       <button className="cta-primary" onClick={handleGetStarted}>
                           Get Started
-                          <span className="cta-arrow">→</span>
+                          <span className="cta-arrow"><FaArrowRight /></span>
                       </button>
                   </div>
               </div>
@@ -66,7 +71,7 @@ export function LandingPage() {
           <div className="cta-buttons">
             <button className="cta-primary large" onClick={handleGetStarted}>
               Get Started Free
-              <span className="cta-arrow">→</span>
+              <span className="cta-arrow"><FaArrowRight /></span>
             </button>
             <Link to="/sessions" className="cta-secondary large">
               Browse Sessions
@@ -78,7 +83,7 @@ export function LandingPage() {
       <footer className="landing-footer">
         <div className="footer-content">
           <div className="footer-brand">
-            <span className="brand-icon">🧘</span>
+            <span className="brand-icon"><FaLeaf /></span>
             Ahoum
           </div>
           <div className="footer-links">

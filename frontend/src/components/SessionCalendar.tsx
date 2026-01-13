@@ -8,7 +8,8 @@ import {
   FaCalendarCheck, 
   FaClock, 
   FaRupeeSign,
-  FaUser 
+  FaUser,
+  FaTimes
 } from 'react-icons/fa'
 
 interface SessionCalendarProps {
@@ -249,7 +250,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="event-modal" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close" onClick={() => setSelectedEvent(null)}>
-              ×
+              <FaTimes />
             </button>
             
             {selectedEvent.image && (
