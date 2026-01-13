@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import './CreatorDashboardPage.css'
+import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes } from 'react-icons/fa'
+import { CreatorSessionCalendar } from '../components/CreatorSessionCalendar'
 
 function minutesToDuration(minutes: number) {
   const h = Math.floor(minutes / 60)
@@ -22,6 +24,7 @@ export function CreatorDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
+  const [showCalendar, setShowCalendar] = useState(false)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -57,6 +60,26 @@ export function CreatorDashboardPage() {
   }, [apiFetch])
 
   const mySessions = useMemo(() => sessions.filter((s) => s.creator === user?.id), [sessions, user?.id])
+  
+  const bookingsForMySessions = useMemo(() => {
+    const mySessionIds = new Set(mySessions.map(s => s.id))
+    return bookings.filter(b => {
+      const sessionId = typeof b.session === 'object' ? b.session.id : b.session
+      return mySessionIds.has(sessionId)
+    })
+  }, [bookings, mySessions])
+
+  const [meetLink, setMeetLink] = useState('')
+  const bookingStats = useMemo(() => {
+    const total = bookingsForMySessions.length
+    const confirmed = bookingsForMySessions.filter(b => b.status === 'CONFIRMED').length
+    const pending = bookingsForMySessions.filter(b => b.status === 'PENDING').length
+    const cancelled = bookingsForMySessions.filter(b => b.status === 'CANCELLED').length
+    const totalRevenue = bookingsForMySessions
+      .filter(b => b.status === 'CONFIRMED' && b.amount_paid)
+      .reduce((sum, b) => sum + parseFloat(b.amount_paid || '0'), 0)
+    return { total, confirmed, pending, cancelled, totalRevenue }
+  }, [bookingsForMySessions])
 
   async function createSession(e: FormEvent) {
     e.preventDefault()
@@ -106,6 +129,34 @@ export function CreatorDashboardPage() {
       setImageFile(null)
     } catch (e2) {
       const msg = e2 && typeof e2 === 'object' && 'message' in e2 ? String((e2 as any).message) : 'Create failed'
+      setError(msg)
+    }
+  }
+
+  async function deleteSession(sessionId: number) {
+    if (!confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+      return
+    }
+    try {
+      await apiFetch(`/api/sessions/${sessionId}/`, { method: 'DELETE' })
+      setSessions((prev) => prev.filter((s) => s.id !== sessionId))
+      setNotice('Session deleted successfully.')
+    } catch (e) {
+      const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Delete failed'
+      setError(msg)
+    }
+  }
+
+  async function updateSession(sessionId: number, updates: Partial<Session>) {
+    try {
+      const updated = await apiFetch<Session>(`/api/sessions/${sessionId}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(updates),
+      })
+      setSessions((prev) => prev.map((s) => (s.id === sessionId ? updated : s)))
+      setNotice('Session updated successfully.')
+    } catch (e) {
+      const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Update failed'
       setError(msg)
     }
   }
@@ -189,6 +240,15 @@ export function CreatorDashboardPage() {
               required
             />
           </div>
+          <div className="meet-link-field">
+            <label className="creator-form-label">Meet Link</label>
+            <input
+              className="creator-form-input"
+              value={meetLink}
+              onChange={(e) => setMeetLink(e.target.value)}
+              placeholder="https://…"
+            />
+          </div>
 
           <div className="creator-form-field">
             <label className="creator-form-label">Image URL (optional)</label>
@@ -228,12 +288,38 @@ export function CreatorDashboardPage() {
             <button className="creator-button creator-button-primary" type="submit">
               Create Session
             </button>
-            <Link to="/" className="creator-button creator-button-secondary">
+            <Link to="/explore" className="creator-button creator-button-secondary">
               View Public Sessions
             </Link>
           </div>
         </form>
       </div>
+
+      {/* Booking Overview Stats */}
+      {mySessions.length > 0 && (
+        <div className="creator-stats-section">
+          <h2 className="creator-section-title">Booking Overview</h2>
+          <div className="creator-stats-grid">
+            <div className="creator-stat-card">
+              <div className="creator-stat-value">{bookingStats.total}</div>
+              <div className="creator-stat-label">Total Bookings</div>
+            </div>
+            <div className="creator-stat-card">
+              <div className="creator-stat-value">{bookingStats.confirmed}</div>
+              <div className="creator-stat-label">Confirmed</div>
+            </div>
+            <div className="creator-stat-card">
+              <div className="creator-stat-value">{bookingStats.pending}</div>
+              <div className="creator-stat-label">Pending</div>
+            </div>
+            <div className="creator-stat-card">
+              <div className="creator-stat-value">₹{bookingStats.totalRevenue.toFixed(2)}</div>
+              <div className="creator-stat-label">Total Revenue</div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* My Sessions */}
       <div className="creator-sessions-section">
@@ -243,16 +329,39 @@ export function CreatorDashboardPage() {
         ) : (
           <div className="creator-sessions-list">
             {mySessions.map((s) => (
-              <Link key={s.id} to={`/sessions/${s.id}`} className="creator-session-item">
-                <div className="creator-session-content">
-                  <div className="creator-session-title">{s.title}</div>
-                  <div className="creator-session-meta">
-                    {new Date(s.start_time).toLocaleString()}
-                    {uploadingImage === s.id && <span style={{ marginLeft: '12px', color: '#0066ff' }}>Uploading image…</span>}
+              <div key={s.id} className="creator-session-item-wrapper">
+                <Link to={`/sessions/${s.id}`} className="creator-session-item">
+                  <div className="creator-session-content">
+                    <div className="creator-session-title">{s.title}</div>
+                    <div className="creator-session-meta">
+                      {new Date(s.start_time).toLocaleString()}
+                      {uploadingImage === s.id && <span style={{ marginLeft: '12px', color: '#0066ff' }}>Uploading image…</span>}
+                    </div>
                   </div>
+                  <div className="creator-session-price">₹ {s.price}</div>
+                </Link>
+                <div className="creator-session-actions">
+                  <button
+                    className="creator-action-btn creator-action-btn-edit"
+                    onClick={() => {
+                      const newTitle = prompt('Enter new title:', s.title)
+                      if (newTitle && newTitle !== s.title) {
+                        updateSession(s.id, { title: newTitle })
+                      }
+                    }}
+                    title="Edit title"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className="creator-action-btn creator-action-btn-delete"
+                    onClick={() => deleteSession(s.id)}
+                    title="Delete session"
+                  >
+                    🗑️
+                  </button>
                 </div>
-                <div className="creator-session-price">₹ {s.price}</div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
@@ -260,39 +369,80 @@ export function CreatorDashboardPage() {
 
       {/* Bookings */}
       <div className="creator-bookings-section">
-        <h2 className="creator-section-title">Bookings on My Sessions ({bookings.length})</h2>
-        {bookings.length === 0 ? (
+        <h2 className="creator-section-title">Bookings on My Sessions ({bookingsForMySessions.length})</h2>
+        {bookingsForMySessions.length === 0 ? (
           <div className="creator-empty-state">No bookings yet.</div>
         ) : (
           <div>
-            {bookings.map((b) => (
-              <div key={b.id} className="creator-booking-item">
-                <div className="creator-booking-title">
-                  Booking #{b.id}
-                  {typeof b.session === 'object' ? ` - ${b.session.title}` : ''}
-                </div>
-                <div className="creator-booking-meta">
-                  {typeof b.session === 'object' ? (
-                    <>
-                      Session: {b.session.title} • Created {new Date(b.created_at).toLocaleString()}
-                      {b.payment_status && (
+            {bookingsForMySessions.map((b) => {
+              const session = typeof b.session === 'object' ? b.session : null
+              return (
+                <div key={b.id} className="creator-booking-item">
+                  <div className="creator-booking-content-wrapper">
+                    <div className="creator-booking-title">
+                      {session ? (
+                        <Link to={`/sessions/${session.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          {session.title}
+                        </Link>
+                      ) : (
+                        `Booking #${b.id}`
+                      )}
+                    </div>
+                    <div className="creator-booking-meta">
+                      {session && (
                         <>
-                          <br />
-                          Payment: {b.payment_status}
-                          {b.amount_paid && ` (₹${b.amount_paid})`}
+                          <span><FaCalendarAlt style={{ marginRight: '6px' }} />{new Date(session.start_time).toLocaleString()}</span>
+                          <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>
                         </>
                       )}
-                    </>
-                  ) : (
-                    <>Session {b.session} • {new Date(b.created_at).toLocaleString()}</>
-                  )}
+                      <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleString()}</span>
+                      {b.payment_status && (
+                        <span><FaCreditCard style={{ marginRight: '6px' }} />Payment: {b.payment_status}</span>
+                      )}
+                      {b.amount_paid && (
+                        <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Amount: ₹{b.amount_paid}</span>
+                      )}
+                    </div>
+                  </div>
+                  <div className={`creator-booking-status ${b.status.toLowerCase()}`}>{b.status}</div>
                 </div>
-                <div className={`creator-booking-status ${b.status.toLowerCase()}`}>{b.status}</div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
+
+      {/* Floating Calendar Icon */}
+      {mySessions.length > 0 && (
+        <button 
+          className="creator-floating-calendar-btn"
+          onClick={() => setShowCalendar(true)}
+          title="Open Calendar"
+        >
+          <FaCalendarAlt />
+        </button>
+      )}
+
+      {/* Calendar Drawer Overlay */}
+      {showCalendar && (
+        <div className="creator-calendar-drawer-overlay" onClick={() => setShowCalendar(false)}>
+          <div className="creator-calendar-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="creator-calendar-drawer-header">
+              <h2>Session Calendar</h2>
+              <button 
+                className="creator-calendar-drawer-close"
+                onClick={() => setShowCalendar(false)}
+                title="Close Calendar"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="creator-calendar-drawer-content">
+              <CreatorSessionCalendar sessions={mySessions} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

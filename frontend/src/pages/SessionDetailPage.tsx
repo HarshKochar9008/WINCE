@@ -2,12 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
-
-declare global {
-  interface Window {
-    Razorpay: any
-  }
-}
+import { loadStripe } from '@stripe/stripe-js'
 
 export function SessionDetailPage() {
   const { id } = useParams()
@@ -19,17 +14,7 @@ export function SessionDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [bookingStatus, setBookingStatus] = useState<string | null>(null)
   const [isProcessingPayment, setIsProcessingPayment] = useState(false)
-
-  useEffect(() => {
-    // Load Razorpay script
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    document.body.appendChild(script)
-    return () => {
-      document.body.removeChild(script)
-    }
-  }, [])
+  const [existingBooking, setExistingBooking] = useState<Booking | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -38,6 +23,22 @@ export function SessionDetailPage() {
         setError(null)
         const data = await apiFetch<Session>(`/api/sessions/${sessionId}/`, { method: 'GET' }, { skipAuth: true })
         if (mounted) setSession(data)
+
+        // Check if user already has a booking for this session
+        if (user) {
+          try {
+            const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
+            const existing = bookings.find(b => {
+              const bookingSessionId = typeof b.session === 'object' ? b.session.id : b.session
+              return bookingSessionId === sessionId
+            })
+            if (mounted && existing) {
+              setExistingBooking(existing)
+            }
+          } catch (e) {
+            // Ignore errors fetching bookings
+          }
+        }
       } catch (e) {
         const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Failed to load'
         if (mounted) setError(msg)
@@ -48,7 +49,7 @@ export function SessionDetailPage() {
     return () => {
       mounted = false
     }
-  }, [apiFetch, sessionId])
+  }, [apiFetch, sessionId, user])
 
   const canBook = useMemo(() => {
     if (!user || !session) return false
@@ -58,6 +59,12 @@ export function SessionDetailPage() {
   }, [user, session])
 
   async function book() {
+    // Check if already booked
+    if (existingBooking) {
+      setBookingStatus(`You already have a ${existingBooking.status.toLowerCase()} booking for this session. Check your dashboard.`)
+      return
+    }
+
     setBookingStatus(null)
     setIsProcessingPayment(true)
     try {
@@ -66,63 +73,35 @@ export function SessionDetailPage() {
         method: 'POST',
         body: JSON.stringify({ session_id: sessionId }),
       })
+      setExistingBooking(booking)
 
-      // Create payment order
+      // Create Stripe Checkout Session
       try {
-        const paymentOrder = await apiFetch<{
-          order_id: string
-          amount: number
-          currency: string
-          key_id: string
+        const checkoutSession = await apiFetch<{
+          session_id: string
+          url: string
+          publishable_key: string
         }>('/api/bookings/create-payment-order/', {
           method: 'POST',
           body: JSON.stringify({ booking_id: booking.id }),
         })
 
-        // Initialize Razorpay
-        const options = {
-          key: paymentOrder.key_id,
-          amount: paymentOrder.amount,
-          currency: paymentOrder.currency,
-          order_id: paymentOrder.order_id,
-          name: 'Ahoum Sessions',
-          description: `Payment for ${session?.title || 'Session'}`,
-          handler: async function (response: any) {
-            try {
-              await apiFetch(`/api/bookings/${booking.id}/verify_payment/`, {
-                method: 'POST',
-                body: JSON.stringify({
-                  payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  razorpay_order_id: response.razorpay_order_id,
-                }),
-              })
-              setBookingStatus('Booking confirmed! Payment successful. Check your dashboard.')
-            } catch (e) {
-              const msg =
-                e && typeof e === 'object' && 'message' in e
-                  ? String((e as any).message)
-                  : 'Payment verification failed'
-              setBookingStatus(`Payment verification failed: ${msg}`)
-            } finally {
-              setIsProcessingPayment(false)
-            }
-          },
-          prefill: {
-            name: user?.name || '',
-            email: user?.email || '',
-          },
-          theme: {
-            color: '#3399cc',
-          },
+        // Load Stripe and redirect to checkout
+        const stripe = await loadStripe(checkoutSession.publishable_key)
+        
+        if (!stripe) {
+          throw new Error('Failed to load Stripe')
         }
 
-        const razorpay = new window.Razorpay(options)
-        razorpay.on('payment.failed', function (response: any) {
-          setBookingStatus(`Payment failed: ${response.error.description || 'Unknown error'}`)
-          setIsProcessingPayment(false)
+        // Redirect to Stripe Checkout
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: checkoutSession.session_id,
         })
-        razorpay.open()
+
+        if (error) {
+          setBookingStatus(`Payment failed: ${error.message}`)
+          setIsProcessingPayment(false)
+        }
       } catch (paymentError) {
         // If payment gateway is not configured, just confirm booking
         const msg =
@@ -138,7 +117,22 @@ export function SessionDetailPage() {
       }
     } catch (e) {
       const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Booking failed'
-      setBookingStatus(`Booking failed: ${msg}`)
+      
+      // Check if it's a duplicate booking error
+      if (msg.includes('already booked')) {
+        setBookingStatus('You have already booked this session. Check your dashboard to see your existing booking.')
+        // Refresh to show the existing booking
+        try {
+          const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
+          const existing = bookings.find(b => {
+            const bookingSessionId = typeof b.session === 'object' ? b.session.id : b.session
+            return bookingSessionId === sessionId
+          })
+          if (existing) setExistingBooking(existing)
+        } catch {}
+      } else {
+        setBookingStatus(`Booking failed: ${msg}`)
+      }
       setIsProcessingPayment(false)
     }
   }
@@ -180,11 +174,37 @@ export function SessionDetailPage() {
             Duration: <code>{session.duration}</code>
           </div>
 
+          {existingBooking && (
+            <div className="card subtle" style={{ backgroundColor: existingBooking.status === 'CONFIRMED' ? '#d4edda' : '#fff3cd', padding: '16px', marginBottom: '16px' }}>
+              <strong>
+                {existingBooking.status === 'CONFIRMED' ? '✅ Already Booked' : 
+                 existingBooking.status === 'PENDING' ? '⏳ Booking Pending' : 
+                 '❌ Booking Cancelled'}
+              </strong>
+              <div style={{ marginTop: '8px', fontSize: '14px' }}>
+                Status: <strong>{existingBooking.status}</strong>
+                {existingBooking.payment_status && ` • Payment: ${existingBooking.payment_status}`}
+                {existingBooking.amount_paid && ` • Amount: ₹${existingBooking.amount_paid}`}
+              </div>
+              <div style={{ marginTop: '8px' }}>
+                <Link to="/dashboard" className="btn btn-secondary" style={{ fontSize: '14px', padding: '8px 16px' }}>
+                  View in Dashboard
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="row">
             {canBook ? (
-              <button className="btn btn-primary" onClick={book} disabled={isProcessingPayment}>
-                {isProcessingPayment ? 'Processing payment…' : `Book session - ₹${session.price}`}
-              </button>
+              existingBooking ? (
+                <button className="btn btn-primary" disabled style={{ opacity: 0.6, cursor: 'not-allowed' }}>
+                  Already Booked
+                </button>
+              ) : (
+                <button className="btn btn-primary" onClick={book} disabled={isProcessingPayment}>
+                  {isProcessingPayment ? 'Processing payment…' : `Book session - ₹${session.price}`}
+                </button>
+              )
             ) : user ? (
               <span className="muted">Login as a normal user to book.</span>
             ) : (

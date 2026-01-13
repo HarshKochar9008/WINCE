@@ -180,6 +180,41 @@
   color: #0066ff;
 }
 
+/* Stats Section */
+.creator-stats-section {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.creator-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.creator-stat-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.creator-stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1e3a8a;
+  margin-bottom: 8px;
+}
+
+.creator-stat-label {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
 /* Sessions List */
 .creator-sessions-section {
   background: #f8fafc;
@@ -201,6 +236,12 @@
   gap: 12px;
 }
 
+.creator-session-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .creator-session-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -212,12 +253,43 @@
   transition: all 0.2s ease;
   text-decoration: none;
   color: inherit;
+  flex: 1;
 }
 
 .creator-session-item:hover {
   border-color: #0066ff;
   box-shadow: 0 2px 8px rgba(0, 102, 255, 0.1);
   transform: translateX(4px);
+}
+
+.creator-session-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.creator-action-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.creator-action-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.creator-action-btn-edit:hover {
+  background: #e0f2fe;
+  border-color: #0066ff;
+}
+
+.creator-action-btn-delete:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
 }
 
 .creator-session-content {
@@ -259,6 +331,14 @@
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.creator-booking-content-wrapper {
+  flex: 1;
 }
 
 .creator-booking-title {
@@ -272,6 +352,15 @@
   font-size: 14px;
   color: #64748b;
   margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.creator-booking-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .creator-booking-status {
@@ -296,6 +385,16 @@
 .creator-booking-status.pending {
   background: #fef3c7;
   color: #92400e;
+}
+
+.creator-booking-status.confirmed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.creator-booking-status.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 /* Alert Messages */
@@ -355,5 +454,184 @@
 
   .creator-button {
     width: 100%;
+  }
+}
+
+/* Floating Calendar Button for Creator */
+.creator-floating-calendar-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(245, 87, 108, 0.4);
+  transition: all 0.3s ease;
+  z-index: 900;
+}
+
+.creator-floating-calendar-btn:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 12px 48px rgba(245, 87, 108, 0.6);
+}
+
+.creator-floating-calendar-btn:active {
+  transform: scale(0.95);
+}
+
+/* Creator Calendar Drawer Overlay */
+.creator-calendar-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: creatorFadeIn 0.3s ease;
+}
+
+@keyframes creatorFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Creator Calendar Drawer */
+.creator-calendar-drawer {
+  background: white;
+  width: 100%;
+  max-width: 900px;
+  height: 100vh;
+  overflow-y: auto;
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+  animation: creatorSlideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+@keyframes creatorSlideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Creator Calendar Drawer Header */
+.creator-calendar-drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(245, 87, 108, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.creator-calendar-drawer-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.creator-calendar-drawer-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.creator-calendar-drawer-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+/* Creator Calendar Drawer Content */
+.creator-calendar-drawer-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Adjust calendar inside drawer */
+.creator-calendar-drawer-content .creator-session-calendar {
+  margin: 0;
+  box-shadow: none;
+}
+
+/* Mobile Responsive for Creator Drawer */
+@media (max-width: 768px) {
+  .creator-floating-calendar-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 20px;
+    bottom: 24px;
+    right: 24px;
+  }
+
+  .creator-calendar-drawer {
+    max-width: 100%;
+  }
+
+  .creator-calendar-drawer-header {
+    padding: 20px 24px;
+  }
+
+  .creator-calendar-drawer-header h2 {
+    font-size: 22px;
+  }
+
+  .creator-calendar-drawer-content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .creator-floating-calendar-btn {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    bottom: 20px;
+    right: 20px;
+  }
+
+  .creator-calendar-drawer-header {
+    padding: 16px 20px;
+  }
+
+  .creator-calendar-drawer-header h2 {
+    font-size: 20px;
+  }
+
+  .creator-calendar-drawer-content {
+    padding: 12px;
   }
 }

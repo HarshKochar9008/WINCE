@@ -1,12 +1,14 @@
-from rest_framework import viewsets
+import logging
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
-from rest_framework import status
 
 from .models import Session
 from .permissions import SessionPermission
 from .serializers import SessionSerializer
+
+logger = logging.getLogger(__name__)
 
 
 class SessionViewSet(viewsets.ModelViewSet):
@@ -18,6 +20,17 @@ class SessionViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
+    
+    def list(self, request, *args, **kwargs):
+        """Override list to add error handling."""
+        try:
+            return super().list(request, *args, **kwargs)
+        except Exception as e:
+            logger.exception(f"Error listing sessions: {e}")
+            return Response(
+                {"detail": "An error occurred while fetching sessions."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)

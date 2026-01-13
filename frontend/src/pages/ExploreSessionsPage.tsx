@@ -1,14 +1,10 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
+import { FaArrowLeft } from 'react-icons/fa'
 import type { Booking, Session } from '../types'
 import './ExploreSessionsPage.css'
-
-declare global {
-  interface Window {
-    Razorpay: any
-  }
-}
+import { loadStripe } from '@stripe/stripe-js'
 
 function formatMoney(amount: string) {
   const n = Number(amount)
@@ -118,6 +114,7 @@ function SessionCard({ session, onBook, isBooking, canBook, user }: SessionCardP
 }
 
 export function ExploreSessionsPage() {
+  const navigate = useNavigate()
   const { apiFetch, user } = useAuth()
   const [sessions, setSessions] = useState<Session[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -125,19 +122,6 @@ export function ExploreSessionsPage() {
   const [bookingStatus, setBookingStatus] = useState<{ [key: number]: string }>({})
   const [bookingSessionId, setBookingSessionId] = useState<number | null>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const script = document.createElement('script')
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-    script.async = true
-    document.body.appendChild(script)
-    return () => {
-      const existingScript = document.body.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')
-      if (existingScript) {
-        document.body.removeChild(existingScript)
-      }
-    }
-  }, [])
 
   useEffect(() => {
     let mounted = true
@@ -178,68 +162,34 @@ export function ExploreSessionsPage() {
       })
 
       try {
-        const paymentOrder = await apiFetch<{
-          order_id: string
-          amount: number
-          currency: string
-          key_id: string
+        const checkoutSession = await apiFetch<{
+          session_id: string
+          url: string
+          publishable_key: string
         }>('/api/bookings/create-payment-order/', {
           method: 'POST',
           body: JSON.stringify({ booking_id: booking.id }),
         })
 
-        const options = {
-          key: paymentOrder.key_id,
-          amount: paymentOrder.amount,
-          currency: paymentOrder.currency,
-          order_id: paymentOrder.order_id,
-          name: 'Ahoum Sessions',
-          description: `Payment for ${session.title}`,
-          handler: async function (response: any) {
-            try {
-              await apiFetch(`/api/bookings/${booking.id}/verify_payment/`, {
-                method: 'POST',
-                body: JSON.stringify({
-                  payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  razorpay_order_id: response.razorpay_order_id,
-                }),
-              })
-              setBookingStatus((prev) => ({
-                ...prev,
-                [session.id]: 'Booking confirmed! Payment successful.',
-              }))
-            } catch (e) {
-              const msg =
-                e && typeof e === 'object' && 'message' in e
-                  ? String((e as any).message)
-                  : 'Payment verification failed'
-              setBookingStatus((prev) => ({
-                ...prev,
-                [session.id]: `Payment verification failed: ${msg}`,
-              }))
-            } finally {
-              setBookingSessionId(null)
-            }
-          },
-          prefill: {
-            name: user?.name || '',
-            email: user?.email || '',
-          },
-          theme: {
-            color: '#2563eb',
-          },
+        // Load Stripe and redirect to checkout
+        const stripe = await loadStripe(checkoutSession.publishable_key)
+        
+        if (!stripe) {
+          throw new Error('Failed to load Stripe')
         }
 
-        const razorpay = new window.Razorpay(options)
-        razorpay.on('payment.failed', function (response: any) {
+        // Redirect to Stripe Checkout
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: checkoutSession.session_id,
+        })
+
+        if (error) {
           setBookingStatus((prev) => ({
             ...prev,
-            [session.id]: `Payment failed: ${response.error.description || 'Unknown error'}`,
+            [session.id]: `Payment failed: ${error.message}`,
           }))
           setBookingSessionId(null)
-        })
-        razorpay.open()
+        }
       } catch (paymentError) {
         const msg =
           paymentError && typeof paymentError === 'object' && 'message' in paymentError
@@ -281,9 +231,16 @@ export function ExploreSessionsPage() {
     <div className="explore-sessions-page">
       <div className="explore-sessions-header">
         <div>
-            <Link to="/dashboard">
-            <h1 style={{ color: '#0f172a', textDecoration: 'none', cursor: 'pointer' }}>Explore Sessions</h1>
-          </Link>
+          <button
+            style={{ width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            className="dashboard-back-button"
+            onClick={() => navigate('/dashboard')}
+            aria-label="Go back"
+          >
+            <FaArrowLeft />
+          </button>
+          <h1 style={{ color: '#0f172a', margin: 0 }}>Explore Sessions</h1>
+          <p style={{ color: '#64748b', margin: '8px 0 0 0' }}>Browse and book upcoming sessions</p>
         </div>
       </div>
 

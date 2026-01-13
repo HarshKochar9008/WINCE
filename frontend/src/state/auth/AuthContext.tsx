@@ -36,7 +36,7 @@ type AuthContextValue = {
   accessToken: string | null
   refreshToken: string | null
   login: (email: string, password: string) => Promise<void>
-  register: (data: { name: string; email: string; password: string; avatar?: string }) => Promise<void>
+  register: (data: { name: string; email: string; password: string; avatar?: string; role?: 'USER' | 'CREATOR' }) => Promise<void>
   googleLogin: (credential: string) => Promise<User>
   githubLogin: (code: string) => Promise<User>
   logout: () => void
@@ -93,10 +93,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     opts: { skipAuth?: boolean } = {},
   ): Promise<T> {
     const headers = new Headers(init.headers)
-    // Set Content-Type to application/json if body exists and is not FormData
     if (init.body && !headers.has('Content-Type')) {
       if (init.body instanceof FormData) {
-        // Don't set Content-Type for FormData, browser will set it with boundary
       } else {
         headers.set('Content-Type', 'application/json')
       }
@@ -116,11 +114,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!res.ok) {
       const body = await safeJson(res)
-      const message =
+      let message =
         (body && typeof body === 'object' && body !== null && 'detail' in body && typeof body.detail === 'string'
           ? body.detail
           : null) ?? `Request failed (${res.status})`
+      
+      // For 500 errors, provide more context if available
+      if (res.status === 500) {
+        const errorText = body && typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
+          ? body.error
+          : null
+        if (errorText) {
+          message = `${message}: ${errorText}`
+        }
+      }
+      
       const err: ApiError = { status: res.status, message, details: body }
+      console.error('API Error:', { path, status: res.status, message, details: body })
       throw err
     }
 
@@ -174,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return data.user
   }
 
-  async function register(input: { name: string; email: string; password: string; avatar?: string }) {
+  async function register(input: { name: string; email: string; password: string; avatar?: string; role?: 'USER' | 'CREATOR' }) {
     const data = await apiFetch<RegisterResponse>(
       '/api/users/register/',
       { method: 'POST', body: JSON.stringify(input) },

@@ -26,6 +26,7 @@ export function SignupPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState('/Avatar/Avatar 1.png')
+  const [role, setRole] = useState<'USER' | 'CREATOR'>('USER')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -39,8 +40,8 @@ export function SignupPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      await register({ name: name.trim(), email: email.trim(), password, avatar: selectedAvatar })
-      const target = typeof from === 'string' ? from : '/dashboard'
+      await register({ name: name.trim(), email: email.trim(), password, avatar: selectedAvatar, role })
+      const target = role === 'CREATOR' ? '/creator' : (typeof from === 'string' ? from : '/dashboard')
       navigate(target, { replace: true })
     } catch (err) {
       let msg = 'Signup failed'
@@ -291,6 +292,58 @@ export function SignupPage() {
 
             <div className="form-group">
               <AvatarSelector selectedAvatar={selectedAvatar} onSelectAvatar={setSelectedAvatar} />
+            </div>
+
+            <div className="form-group">
+              <label className="field">
+                <span className="label">Account Type</span>
+                <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
+                  <label
+                    style={{
+                      flex: 1,
+                      padding: '16px',
+                      border: `2px solid ${role === 'USER' ? '#0066ff' : '#e2e8f0'}`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      background: role === 'USER' ? '#f0f9ff' : '#ffffff',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="USER"
+                      checked={role === 'USER'}
+                      onChange={(e) => setRole(e.target.value as 'USER' | 'CREATOR')}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>User</div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Browse and book sessions</div>
+                  </label>
+                  <label
+                    style={{
+                      flex: 1,
+                      padding: '16px',
+                      border: `2px solid ${role === 'CREATOR' ? '#0066ff' : '#e2e8f0'}`,
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      background: role === 'CREATOR' ? '#f0f9ff' : '#ffffff',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="role"
+                      value="CREATOR"
+                      checked={role === 'CREATOR'}
+                      onChange={(e) => setRole(e.target.value as 'USER' | 'CREATOR')}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>Creator</div>
+                    <div style={{ fontSize: '12px', color: '#64748b' }}>Create and manage sessions</div>
+                  </label>
+                </div>
+              </label>
             </div>
 
             {error && <div className="error-message">Error: {error}</div>}

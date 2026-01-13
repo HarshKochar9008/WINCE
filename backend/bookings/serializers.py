@@ -9,6 +9,7 @@ from .models import Booking
 class BookingSerializer(serializers.ModelSerializer):
     session_id = serializers.PrimaryKeyRelatedField(source="session", queryset=Session.objects.all(), write_only=True)
     session = SessionSerializer(read_only=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Booking

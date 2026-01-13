@@ -2,7 +2,7 @@
 
 A full-stack session booking platform built with Django REST Framework and React. Users can create and book sessions, with Google OAuth authentication.
 
-## 🏗️ Architecture
+## Architecture
 
 - **Backend**: Django REST Framework with JWT authentication
 - **Frontend**: React + TypeScript + Vite
@@ -10,13 +10,13 @@ A full-stack session booking platform built with Django REST Framework and React
 - **Reverse Proxy**: Nginx
 - **Containerization**: Docker & Docker Compose
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Docker and Docker Compose
 - Python 3.11+ (for local development)
 - Node.js 18+ and npm (for local frontend development)
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Using Docker Compose (Recommended)
 
@@ -121,7 +121,7 @@ A full-stack session booking platform built with Django REST Framework and React
    npm run dev
    ```
 
-## 🔧 Environment Variables
+## Environment Variables
 
 ### Backend (.env or docker-compose.yml)
 
@@ -136,6 +136,12 @@ A full-stack session booking platform built with Django REST Framework and React
 | `POSTGRES_USER` | Database user | `ahoum` |
 | `POSTGRES_PASSWORD` | Database password | `ahoum` |
 | `GOOGLE_OAUTH_CLIENT_ID` | Google OAuth client ID | - |
+| `GITHUB_OAUTH_CLIENT_ID` | GitHub OAuth client ID | - |
+| `GITHUB_OAUTH_CLIENT_SECRET` | GitHub OAuth client secret | - |
+| `STRIPE_SECRET_KEY` | Stripe Secret API Key (for payments) | - |
+| `STRIPE_PUBLISHABLE_KEY` | Stripe Publishable API Key (for payments) | - |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook Secret (optional) | - |
+| `FRONTEND_URL` | Frontend URL for payment redirects | `http://localhost:5173` |
 | `CORS_ALLOWED_ORIGINS` | Comma-separated CORS origins | `http://localhost:5173` |
 | `CSRF_TRUSTED_ORIGINS` | Comma-separated CSRF trusted origins | `http://localhost` |
 
@@ -146,7 +152,7 @@ A full-stack session booking platform built with Django REST Framework and React
 | `VITE_API_BASE_URL` | Backend API base URL | `""` (relative) |
 | `VITE_GOOGLE_CLIENT_ID` | Google OAuth client ID | - |
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 Ahoum/
@@ -170,7 +176,7 @@ Ahoum/
 └── README.md
 ```
 
-## 🔐 Authentication
+## Authentication
 
 The application uses JWT (JSON Web Tokens) for authentication with Google OAuth integration:
 
@@ -180,28 +186,35 @@ The application uses JWT (JSON Web Tokens) for authentication with Google OAuth 
 4. Backend verifies token and returns JWT access/refresh tokens
 5. Frontend stores tokens and includes them in API requests
 
-## 📚 API Endpoints
+## API Endpoints
 
 ### Authentication
+- `POST /api/auth/token/` - Get JWT tokens with username/password
+- `POST /api/auth/token/refresh/` - Refresh JWT access token
 - `POST /api/auth/google/` - Authenticate with Google OAuth
+- `POST /api/auth/github/` - Authenticate with GitHub OAuth
 
 ### Sessions
 - `GET /api/sessions/` - List all sessions
 - `GET /api/sessions/:id/` - Get session details
 - `POST /api/sessions/` - Create a new session (creator only)
-- `PUT /api/sessions/:id/` - Update session (creator only)
+- `PATCH /api/sessions/:id/` - Update session (creator only)
 - `DELETE /api/sessions/:id/` - Delete session (creator only)
+- `POST /api/sessions/:id/upload_image/` - Upload session image
 
 ### Bookings
-- `GET /api/bookings/` - List user's bookings
+- `GET /api/bookings/` - List user's bookings (or creator's session bookings)
+- `GET /api/bookings/:id/` - Get booking details
 - `POST /api/bookings/` - Create a booking
-- `PUT /api/bookings/:id/` - Update booking status
-- `DELETE /api/bookings/:id/` - Cancel booking
+- `POST /api/bookings/create-payment-order/` - Create Stripe Checkout Session
+- `POST /api/bookings/:id/verify_payment/` - Verify payment and confirm booking
 
 ### Users
 - `GET /api/users/me/` - Get current user profile
+- `PATCH /api/users/me/` - Update current user profile
+- `POST /api/users/signup/` - Register new user
 
-## 🧪 Development
+## Development
 
 ### Running Tests
 
@@ -231,7 +244,7 @@ cd frontend
 npm run lint
 ```
 
-## 🐳 Docker Commands
+## Docker Commands
 
 ```bash
 # Build and start all services
@@ -257,7 +270,7 @@ docker-compose build [service_name]
 docker-compose down -v
 ```
 
-## 🚢 Production Deployment
+## Production Deployment
 
 1. **Set production environment variables**
    - Set `DJANGO_DEBUG=0`
@@ -281,7 +294,7 @@ docker-compose down -v
    docker-compose exec backend python manage.py migrate
    ```
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/amazing-feature`)
@@ -289,27 +302,59 @@ docker-compose down -v
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 [Add your license here]
 
-## 👥 Authors
+## Authors
 
 [Add author information here]
 
-## 🐛 Troubleshooting
+## Payment Integration
+
+This application uses **Stripe** for secure payment processing. To set up payments:
+
+1. **Sign up for Stripe**: Visit [https://stripe.com/](https://stripe.com/)
+2. **Get your API keys**: Dashboard → Developers → API Keys
+3. **Configure environment**: Add keys to `.env` file
+   ```env
+   STRIPE_SECRET_KEY="sk_test_YOUR_SECRET_KEY"
+   STRIPE_PUBLISHABLE_KEY="pk_test_YOUR_PUBLISHABLE_KEY"
+   STRIPE_WEBHOOK_SECRET=""  # Optional
+   FRONTEND_URL="http://localhost:5173"
+   ```
+4. **Install dependencies**:
+   - Backend: `cd backend && pip install -r requirements.txt`
+   - Frontend: `cd frontend && npm install`
+5. **Restart services**: The payment gateway will be automatically enabled
+
+For detailed setup instructions, test cards, and troubleshooting, see **[STRIPE_SETUP.md](./STRIPE_SETUP.md)**
+
+### Migration from Razorpay
+If you're migrating from Razorpay, see **[STRIPE_MIGRATION_SUMMARY.md](./STRIPE_MIGRATION_SUMMARY.md)**
+
+## Troubleshooting
 
 ### Backend won't start
 - Check database connection settings
-- Ensure migrations are applied
+- Ensure migrations are applied: `python manage.py migrate`
 - Verify environment variables are set correctly
+- Check if stripe package is installed: `pip install stripe`
 
 ### Frontend can't connect to backend
 - Check `VITE_API_BASE_URL` is set correctly
 - Verify CORS settings in backend
-- Ensure backend is running
+- Ensure backend is running on port 8000
+
+### Payment issues
+- **"Payment gateway is not configured"**: Set `STRIPE_SECRET_KEY` and `STRIPE_PUBLISHABLE_KEY` in `.env`
+- **"Failed to load Stripe"**: Run `npm install` in the frontend directory
+- **Payment succeeds but booking not confirmed**: Check that `FRONTEND_URL` is set correctly
+- **Redirect issues**: Ensure `FRONTEND_URL` matches your frontend URL exactly
+- See [STRIPE_SETUP.md](./STRIPE_SETUP.md) for more payment troubleshooting
 
 ### Docker issues
 - Ensure Docker and Docker Compose are installed and running
 - Check port 80 is not already in use
 - Try rebuilding containers: `docker-compose build --no-cache`
+- Remove volumes and rebuild: `docker-compose down -v && docker-compose up --build`

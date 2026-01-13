@@ -1,37 +1,36 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
-import type { Booking } from '../types'
-import { AvatarSelector } from '../components/AvatarSelector'
+import type { Booking, Session } from '../types'
 import './UserDashboardPage.css'
+import { FaArrowLeft, FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes } from 'react-icons/fa'
+import { loadStripe } from '@stripe/stripe-js'
+import { SessionCalendar } from '../components/SessionCalendar'
 
 export function UserDashboardPage() {
   const navigate = useNavigate()
-  const { user, apiFetch, updateProfile } = useAuth()
+  const { user, apiFetch } = useAuth()
   const [bookings, setBookings] = useState<Booking[]>([])
+  const [sessions, setSessions] = useState<Session[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [profileName, setProfileName] = useState(user?.name || '')
-  const [profileAvatar, setProfileAvatar] = useState(user?.avatar || '/Avatar/Avatar 1.png')
-  const [profileError, setProfileError] = useState<string | null>(null)
-  const [profileLoading, setProfileLoading] = useState(false)
-
-  useEffect(() => {
-    if (user) {
-      setProfileName(user.name)
-      setProfileAvatar(user.avatar || '/Avatar/Avatar 1.png')
-    }
-  }, [user])
+  const [paymentLoading, setPaymentLoading] = useState<number | null>(null)
+  const [paymentError, setPaymentError] = useState<{ [key: number]: string }>({})
+  const [showCalendar, setShowCalendar] = useState(false)
 
   useEffect(() => {
     let mounted = true
     ;(async () => {
       try {
         setError(null)
-        const data = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
-        if (mounted) setBookings(data)
+        const [bookingsData, sessionsData] = await Promise.all([
+          apiFetch<Booking[]>('/api/bookings/', { method: 'GET' }),
+          apiFetch<Session[]>('/api/sessions/', { method: 'GET' })
+        ])
+        if (mounted) {
+          setBookings(bookingsData)
+          setSessions(sessionsData)
+        }
       } catch (e) {
         const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Failed to load'
         if (mounted) setError(msg)
@@ -41,6 +40,35 @@ export function UserDashboardPage() {
     })()
     return () => {
       mounted = false
+    }
+  }, [apiFetch])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const paymentStatus = params.get('payment')
+    const bookingId = params.get('booking_id')
+    
+    if (paymentStatus === 'success' && bookingId) {
+      const verifyPayment = async () => {
+        try {
+          const sessionId = params.get('session_id')
+          if (sessionId) {
+            await apiFetch(`/api/bookings/${bookingId}/verify_payment/`, {
+              method: 'POST',
+              body: JSON.stringify({ session_id: sessionId }),
+            })
+            const data = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
+            setBookings(data)
+          }
+        } catch (e) {
+          console.error('Payment verification failed:', e)
+        } finally {
+          window.history.replaceState({}, '', '/dashboard')
+        }
+      }
+      verifyPayment()
+    } else if (paymentStatus === 'cancelled') {
+      window.history.replaceState({}, '', '/dashboard')
     }
   }, [apiFetch])
 
@@ -61,24 +89,8 @@ export function UserDashboardPage() {
     return { activeBookings: active, pastBookings: past }
   }, [bookings])
 
-  // Calculate progress (sessions completed vs total)
   const progressDay = Math.min(activeBookings.length + pastBookings.length, 14)
   const progressTotal = 14
-
-  async function handleProfileSubmit(e: FormEvent) {
-    e.preventDefault()
-    setProfileError(null)
-    setProfileLoading(true)
-    try {
-      await updateProfile({ name: profileName, avatar: profileAvatar })
-      setIsEditingProfile(false)
-    } catch (e) {
-      const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Update failed'
-      setProfileError(msg)
-    } finally {
-      setProfileLoading(false)
-    }
-  }
 
   function formatSessionTitle(booking: Booking) {
     const session = typeof booking.session === 'object' ? booking.session : null
@@ -90,134 +102,121 @@ export function UserDashboardPage() {
     return session ? new Date(session.start_time) : null
   }
 
+  async function handlePayment(booking: Booking) {
+    const session = typeof booking.session === 'object' ? booking.session : null
+    if (!session || !user) return
+
+    setPaymentLoading(booking.id)
+    setPaymentError((prev) => ({ ...prev, [booking.id]: '' }))
+
+    try {
+      const checkoutSession = await apiFetch<{
+        session_id: string
+        url: string
+        publishable_key: string
+      }>('/api/bookings/create-payment-order/', {
+        method: 'POST',
+        body: JSON.stringify({ booking_id: booking.id }),
+      })
+
+      const stripe = await loadStripe(checkoutSession.publishable_key)
+      
+      if (!stripe) {
+        throw new Error('Failed to load Stripe')
+      }
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId: checkoutSession.session_id,
+      })
+
+      if (error) {
+        setPaymentError((prev) => ({
+          ...prev,
+          [booking.id]: `Payment failed: ${error.message}`,
+        }))
+        setPaymentLoading(null)
+      }
+    } catch (paymentError) {
+      const msg =
+        paymentError && typeof paymentError === 'object' && 'message' in paymentError
+          ? String((paymentError as any).message)
+          : 'Payment gateway not available'
+      setPaymentError((prev) => ({
+        ...prev,
+        [booking.id]: `Payment setup failed: ${msg}`,
+      }))
+      setPaymentLoading(null)
+    }
+  }
+
   return (
     <div className="dashboard-modern">
-      
-      <div className="dashboard-header-section">
-        <button className="dashboard-back-button" onClick={() => navigate(-1)}>
-          ←
-        </button>
-        <div className="dashboard-progress">Day {progressDay} of {progressTotal}</div>
-        <h1 className="dashboard-title">Your Journey</h1>
-        <div className="dashboard-header-actions">
-          <button className="dashboard-start-button" onClick={() => navigate('/')}>
-            Start
+      <div className="dashboard-container-box">
+        <div className="dashboard-header-section">
+          <button className="dashboard-back-button" onClick={() => navigate('/')} aria-label="Go back">
+            <FaArrowLeft />
           </button>
-          <a href="#" className="dashboard-watch-link" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
-            Explore sessions
-          </a>
-        </div>
-      </div>
-
-      <div className="dashboard-features">
-        <Link to="/" className="dashboard-feature-card peach">
-          <div className="dashboard-feature-icon">
-            <img src="/images/Boat.png" alt="Staying on track" />
-          </div>
-          <div className="dashboard-feature-text">Staying on track</div>
-        </Link>
-        <Link to="/" className="dashboard-feature-card lavender">
-          <div className="dashboard-feature-icon">
-            <img src="/images/Bird2.png" alt="Calming Flight Anxiety" />
-          </div>
-          <div className="dashboard-feature-text">Calming Flight Anxiety</div>
-        </Link>
-        <Link to="/" className="dashboard-feature-card blue">
-          <div className="dashboard-feature-icon">
-            <img src="/images/Whale.png" alt="Deep sleep" />
-          </div>
-          <div className="dashboard-feature-text">Deep sleep</div>
-        </Link>
-      </div>
-
-      {/* Stats Section */}
-      <div className="dashboard-stats-grid">
-        <div className="dashboard-stat-card">
-          <div className="dashboard-stat-value">{activeBookings.length}</div>
-          <div className="dashboard-stat-label">Active Bookings</div>
-        </div>
-        <div className="dashboard-stat-card">
-          <div className="dashboard-stat-value">{pastBookings.length}</div>
-          <div className="dashboard-stat-label">Completed</div>
-        </div>
-        <div className="dashboard-stat-card">
-          <div className="dashboard-stat-value">{bookings.length}</div>
-          <div className="dashboard-stat-label">Total Sessions</div>
-        </div>
-      </div>
-
-      {/* <div className="dashboard-profile-section">
-        <div className="dashboard-profile-header">
-          <h2 className="dashboard-section-title">Profile</h2>
-          {!isEditingProfile && (
-            <button className="dashboard-action-button" onClick={() => setIsEditingProfile(true)}>
-              Edit
+          <h1 className="dashboard-title">Your Journey</h1>
+          <div className="dashboard-header-actions">
+            <button className="dashboard-start-button" onClick={() => navigate('/explore')}>
+              Start
             </button>
-          )}
+            <a href="#" className="dashboard-watch-link" onClick={(e) => { e.preventDefault(); navigate('/explore'); }}>
+              Explore sessions
+            </a>
+          </div>
         </div>
 
-        {isEditingProfile ? (
-          <form onSubmit={handleProfileSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <label style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 600, color: '#475569' }}>Name</span>
-              <input
-                value={profileName}
-                onChange={(e) => setProfileName(e.target.value)}
-                required
-                disabled={profileLoading}
-                style={{
-                  padding: '10px 12px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-              />
-            </label>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <AvatarSelector selectedAvatar={profileAvatar || '/Avatar/Avatar 1.png'} onSelectAvatar={setProfileAvatar} />
+        <div className="dashboard-features">
+          <Link to="/explore" className="dashboard-feature-card peach">
+            <div className="dashboard-feature-icon">
+              <img src="/images/Boat.png" alt="Explore New Sessions" />
             </div>
-
-            {profileError ? <div style={{ color: '#dc2626', fontSize: '14px' }}>Error: {profileError}</div> : null}
-
-            <div className="dashboard-quick-actions">
-              <button className="dashboard-action-button primary" type="submit" disabled={profileLoading}>
-                {profileLoading ? 'Saving…' : 'Save Changes'}
-              </button>
-              <button
-                className="dashboard-action-button"
-                type="button"
-                onClick={() => {
-                  setIsEditingProfile(false)
-                  setProfileError(null)
-                  if (user) {
-                    setProfileName(user.name)
-                    setProfileAvatar(user.avatar)
-                  }
-                }}
-                disabled={profileLoading}
-              >
-                Cancel
-              </button>
+            <div className="dashboard-feature-text">Explore New Sessions</div>
+          </Link>
+          <div 
+            className="dashboard-feature-card lavender" 
+            style={{ cursor: 'pointer' }}
+            onClick={() => setShowCalendar(true)}
+          >
+            <div className="dashboard-feature-icon">
+              <img src="/images/Bird2.png" alt="My Schedule" />
             </div>
-          </form>
-        ) : (
-          <div className="dashboard-profile-content">
-            <div className="dashboard-profile-avatar">
-              {user?.avatar ? (
-                <img src={user.avatar.startsWith('/') ? user.avatar : `/${user.avatar}`} alt="Avatar" />
-              ) : (
-                <img src="/Avatar/Avatar 1.png" alt="Default Avatar" />
-              )}
-            </div>
-            <div className="dashboard-profile-info">
-              <div className="dashboard-profile-name">{user?.name || 'Not set'}</div>
-              <div className="dashboard-profile-email">{user?.email}</div>
-              <div className="dashboard-profile-role">{user?.role}</div>
-            </div>
+            <div className="dashboard-feature-text">My Schedule</div>
           </div>
-        )}
-      </div> */}
+          <Link to="/profile" className="dashboard-feature-card blue">
+            <div className="dashboard-feature-icon">
+              <img src="/images/Whale.png" alt="My Profile" />
+            </div>
+            <div className="dashboard-feature-text">My Profile</div>
+          </Link>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' , marginTop: '32px' }} className="dashboard-stats-grid">
+          <div className="dashboard-stat-card">
+            <div style={{ fontSize: '36px', fontWeight: 800, color: '#1e3a8a', marginBottom: '8px' }} className="dashboard-stat-value">{activeBookings.length}</div>
+            <div className="dashboard-stat-label">Active Bookings</div>
+          </div>
+          <div className="dashboard-stat-card">
+            <div style={{ fontSize: '36px', fontWeight: 800, color: '#1e3a8a', marginBottom: '8px' }} className="dashboard-stat-value">{pastBookings.length}</div>
+            <div className="dashboard-stat-label">Completed</div>
+          </div>
+          <div className="dashboard-stat-card">
+            <div className="dashboard-stat-value">{bookings.length}</div>
+            <div className="dashboard-stat-label">Total Sessions</div>
+          </div>
+        </div>
+
+
+      </div>
+
+              <button 
+          className="vertical-calendar-btn"
+          onClick={() => setShowCalendar(true)}
+          title="Open Calendar"
+        >
+          <span className="vertical-text">CALENDAR</span>
+        </button>
 
       {activeBookings.length > 0 && (
         <div className="dashboard-bookings-section">
@@ -230,15 +229,42 @@ export function UserDashboardPage() {
             <div className="dashboard-bookings-list">
               {activeBookings.map((b) => {
                 const startTime = getSessionStartTime(b)
+                const session = typeof b.session === 'object' ? b.session : null
+                const isPending = b.payment_status !== 'paid' && b.status === 'PENDING'
                 return (
                   <div key={b.id} className="dashboard-booking-item">
                     <div className="dashboard-booking-content">
-                      <div className="dashboard-booking-title">{formatSessionTitle(b)}</div>
-                      <div className="dashboard-booking-meta">
-                        {startTime && <span>📅 {startTime.toLocaleString()}</span>}
-                        <span>🕐 Created {new Date(b.created_at).toLocaleDateString()}</span>
-                        {b.payment_status && <span>💳 {b.payment_status}</span>}
+                      <div className="dashboard-booking-title">
+                        {session ? (
+                          <Link to={`/sessions/${session.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            {formatSessionTitle(b)}
+                          </Link>
+                        ) : (
+                          formatSessionTitle(b)
+                        )}
                       </div>
+                      <div className="dashboard-booking-meta">
+                        {startTime && <span><FaCalendarAlt style={{ marginRight: '6px' }} />{startTime.toLocaleString()}</span>}
+                        {session && <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>}
+                        <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleDateString()}</span>
+                        {b.payment_status && <span><FaCreditCard style={{ marginRight: '6px' }} />{b.payment_status}</span>}
+                        {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
+                      </div>
+                      {paymentError[b.id] && (
+                        <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '8px' }}>
+                          {paymentError[b.id]}
+                        </div>
+                      )}
+                      {isPending && (
+                        <button
+                          className="dashboard-action-button primary"
+                          onClick={() => handlePayment(b)}
+                          disabled={paymentLoading === b.id}
+                          style={{ marginTop: '12px' }}
+                        >
+                          {paymentLoading === b.id ? 'Processing...' : 'Pay Now'}
+                        </button>
+                      )}
                     </div>
                     <div className={`dashboard-booking-status ${b.status.toLowerCase()}`}>{b.status}</div>
                   </div>
@@ -251,18 +277,45 @@ export function UserDashboardPage() {
       {pastBookings.length > 0 && (
         <div className="dashboard-bookings-section">
           <h2 className="dashboard-section-title">Past Bookings</h2>
-          <div className="dashboard-bookings-list">
+            <div className="dashboard-bookings-list">
             {pastBookings.map((b) => {
               const startTime = getSessionStartTime(b)
+              const session = typeof b.session === 'object' ? b.session : null
+              const isPending = b.payment_status !== 'paid' && b.status === 'PENDING'
               return (
                 <div key={b.id} className="dashboard-booking-item">
                   <div className="dashboard-booking-content">
-                    <div className="dashboard-booking-title">{formatSessionTitle(b)}</div>
-                    <div className="dashboard-booking-meta">
-                      {startTime && <span>📅 {startTime.toLocaleString()}</span>}
-                      <span>🕐 Created {new Date(b.created_at).toLocaleDateString()}</span>
-                      {b.payment_status && <span>💳 {b.payment_status}</span>}
+                    <div className="dashboard-booking-title">
+                      {session ? (
+                        <Link to={`/sessions/${session.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          {formatSessionTitle(b)}
+                        </Link>
+                      ) : (
+                        formatSessionTitle(b)
+                      )}
                     </div>
+                    <div className="dashboard-booking-meta">
+                      {startTime && <span><FaCalendarAlt style={{ marginRight: '6px' }} />{startTime.toLocaleString()}</span>}
+                      {session && <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>}
+                      <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleDateString()}</span>
+                      {b.payment_status && <span><FaCreditCard style={{ marginRight: '6px' }} />{b.payment_status}</span>}
+                      {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
+                    </div>
+                    {paymentError[b.id] && (
+                      <div style={{ color: '#dc2626', fontSize: '14px', marginTop: '8px' }}>
+                        {paymentError[b.id]}
+                      </div>
+                    )}
+                    {isPending && (
+                      <button
+                        className="dashboard-action-button primary"
+                        onClick={() => handlePayment(b)}
+                        disabled={paymentLoading === b.id}
+                        style={{ marginTop: '12px' }}
+                      >
+                        {paymentLoading === b.id ? 'Processing...' : 'Pay Now'}
+                      </button>
+                    )}
                   </div>
                   <div className={`dashboard-booking-status ${b.status.toLowerCase()}`}>{b.status}</div>
                 </div>
@@ -275,23 +328,31 @@ export function UserDashboardPage() {
         <div className="dashboard-empty-state">
           <h3>No bookings yet</h3>
           <p>Start exploring and book your first session!</p>
-          <Link to="/" className="dashboard-action-button primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+          <Link to="/explore" className="dashboard-action-button primary" style={{ marginTop: '16px', display: 'inline-block' }}>
             Browse Sessions
           </Link>
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="dashboard-quick-actions">
-        <Link to="/" className="dashboard-action-button primary">
-          Browse Sessions
-        </Link>
-        {activeBookings.length > 0 && (
-          <Link to="/" className="dashboard-action-button">
-            View Calendar
-          </Link>
-        )}
-      </div>
+      {showCalendar && (
+        <div className="calendar-drawer-overlay" onClick={() => setShowCalendar(false)}>
+          <div className="calendar-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="calendar-drawer-header">
+              <h2>Session Calendar</h2>
+              <button 
+                className="calendar-drawer-close"
+                onClick={() => setShowCalendar(false)}
+                title="Close Calendar"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="calendar-drawer-content">
+              <SessionCalendar bookings={bookings} sessions={sessions} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -22,11 +22,17 @@ class RegisterSerializer(serializers.ModelSerializer):
     )
     email = serializers.EmailField(required=True)
     name = serializers.CharField(required=True, max_length=150, allow_blank=False)
+    role = serializers.ChoiceField(
+        choices=User.Role.choices,
+        default=User.Role.USER,
+        required=False,
+        help_text="Select USER to browse and book sessions, or CREATOR to create and manage sessions",
+    )
 
     class Meta:
         model = User
         fields = ("id", "email", "name", "avatar", "role", "password")
-        read_only_fields = ("id", "role")
+        read_only_fields = ("id",)
 
     def validate_email(self, value):
         """Validate email format and check for uniqueness."""
@@ -69,9 +75,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         """Additional validation for the entire serializer."""
-        # Ensure role is not provided in request (it's read-only)
-        if "role" in attrs:
-            attrs.pop("role")
+        # Ensure role defaults to USER if not provided
+        if "role" not in attrs or not attrs.get("role"):
+            attrs["role"] = User.Role.USER
         return attrs
 
     def create(self, validated_data):

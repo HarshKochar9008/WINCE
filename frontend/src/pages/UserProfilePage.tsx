@@ -80,10 +80,10 @@ export function UserProfilePage() {
                     }}
                   />
                 </div>
-                <div className="profile-info">
+                <div  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }} className="profile-info">
                   <h2 className="profile-name">{user.name || 'Not set'}</h2>
                   <p className="profile-email">{user.email}</p>
-                  <div className="profile-role-badge">
+                  <div style={{ width: '100px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="profile-role-badge">
                     <span>{user.role}</span>
                   </div>
                 </div>

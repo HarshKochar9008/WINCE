@@ -10,7 +10,6 @@ const AVATARS = [
   '/Avatar/Avatar 6.png',
   '/Avatar/Avatar 7.png',
   '/Avatar/Avatar 8.png',
-  '/Avatar/Avatar 9.png',
 ]
 
 interface AvatarSelectorProps {
@@ -24,7 +23,7 @@ export function AvatarSelector({ selectedAvatar, onSelectAvatar }: AvatarSelecto
       <label className="avatar-selector-label">
         <span>Choose Your Avatar</span>
       </label>
-      <div className="avatar-grid">
+      <div style={{ display: 'flex', gridTemplateColumns: 'repeat(3, 1fr)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }} className="avatar-grid">
         {AVATARS.map((avatar) => (
           <button
             key={avatar}
