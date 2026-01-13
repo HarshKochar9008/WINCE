@@ -54,8 +54,8 @@ export function SessionDetailPage() {
 
   const canBook = useMemo(() => {
     if (!user || !session) return false
-    if (user.role !== 'USER') return false
-    if (session.creator === user.id) return false
+    // Users and creators can book sessions, but creators cannot book their own sessions
+    if (user.role === 'CREATOR' && session.creator === user.id) return false
     return true
   }, [user, session])
 
@@ -76,7 +76,26 @@ export function SessionDetailPage() {
       })
       setExistingBooking(booking)
 
-      // Create Stripe Checkout Session
+      // Check if session is free (price = 0)
+      const isFreeSession = session && parseFloat(session.price) === 0
+      
+      if (isFreeSession) {
+        // Free sessions are auto-confirmed, no payment needed
+        setBookingStatus('Booked successfully! This is a free session.')
+        setIsProcessingPayment(false)
+        // Refresh to get the updated booking status
+        try {
+          const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
+          const existing = bookings.find(b => {
+            const bookingSessionId = typeof b.session === 'object' ? b.session.id : b.session
+            return bookingSessionId === sessionId
+          })
+          if (existing) setExistingBooking(existing)
+        } catch {}
+        return
+      }
+
+      // Create Stripe Checkout Session for paid sessions
       try {
         const checkoutSession = await apiFetch<{
           session_id: string
@@ -158,7 +177,7 @@ export function SessionDetailPage() {
               <div className="h2">{session.title}</div>
               <div className="muted">{new Date(session.start_time).toLocaleString()}</div>
             </div>
-            <div className="pill">₹ {session.price}</div>
+            <div className="pill">{parseFloat(session.price) === 0 ? 'Free' : `₹ ${session.price}`}</div>
           </div>
 
           {(session.image_url || session.image) && (
@@ -213,11 +232,11 @@ export function SessionDetailPage() {
                 </button>
               ) : (
                 <button className="btn btn-primary" onClick={book} disabled={isProcessingPayment}>
-                  {isProcessingPayment ? 'Processing payment…' : `Book session - ₹${session.price}`}
+                  {isProcessingPayment ? 'Processing payment…' : parseFloat(session.price) === 0 ? 'Book Free Session' : `Book session - ₹${session.price}`}
                 </button>
               )
             ) : user ? (
-              <span className="muted">Login as a normal user to book.</span>
+              <span className="muted">Cannot book your own session.</span>
             ) : (
               <Link className="btn btn-primary" to="/login" state={{ from: `/sessions/${sessionId}` }}>
                 Login to book

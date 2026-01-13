@@ -47,6 +47,7 @@ type AuthContextValue = {
   ) => Promise<T>
   refreshSession: () => Promise<boolean>
   updateProfile: (data: { name?: string; avatar?: string }) => Promise<User>
+  becomeCreator: () => Promise<User>
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -152,6 +153,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return updated
   }
 
+  async function becomeCreator() {
+    const data = await apiFetch<{ user: User; message?: string }>('/api/users/become-creator/', {
+      method: 'POST',
+    })
+    setUser(data.user)
+    return data.user
+  }
+
   async function login(email: string, password: string) {
     const data = await apiFetch<LoginResponse>(
       '/api/auth/token/',
@@ -233,8 +242,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       apiFetch,
       refreshSession,
       updateProfile,
+      becomeCreator,
     }),
-    [user, isLoading, accessToken, refreshToken, login, register, googleLogin, githubLogin, logout, apiFetch, refreshSession, updateProfile],
+    [user, isLoading, accessToken, refreshToken, login, register, googleLogin, githubLogin, logout, apiFetch, refreshSession, updateProfile, becomeCreator],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

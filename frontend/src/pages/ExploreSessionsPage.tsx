@@ -8,6 +8,7 @@ import { loadStripe } from '@stripe/stripe-js'
 
 function formatMoney(amount: string) {
   const n = Number(amount)
+  if (n === 0) return 'Free'
   if (Number.isFinite(n)) return n.toLocaleString(undefined, { style: 'currency', currency: 'INR' })
   return amount
 }
@@ -97,7 +98,7 @@ function SessionCard({ session, onBook, isBooking, canBook, user }: SessionCardP
               {isBooking ? 'Booking...' : 'Book Now'}
             </button>
           ) : user ? (
-            <span className="explore-session-card__disabled-text">Login as user to book</span>
+            <span className="explore-session-card__disabled-text">Cannot book your own session</span>
           ) : (
             <Link
               to="/login"
@@ -144,8 +145,8 @@ export function ExploreSessionsPage() {
 
   const canBookSession = (session: Session) => {
     if (!user) return false
-    if (user.role !== 'USER') return false
-    if (session.creator === user.id) return false
+    // Users and creators can book sessions, but creators cannot book their own sessions
+    if (user.role === 'CREATOR' && session.creator === user.id) return false
     return true
   }
 
@@ -160,6 +161,19 @@ export function ExploreSessionsPage() {
         method: 'POST',
         body: JSON.stringify({ session_id: session.id }),
       })
+
+      // Check if session is free (price = 0)
+      const isFreeSession = parseFloat(session.price) === 0
+      
+      if (isFreeSession) {
+        // Free sessions are auto-confirmed, no payment needed
+        setBookingStatus((prev) => ({
+          ...prev,
+          [session.id]: 'Booked successfully! This is a free session.',
+        }))
+        setBookingSessionId(null)
+        return
+      }
 
       try {
         const checkoutSession = await apiFetch<{

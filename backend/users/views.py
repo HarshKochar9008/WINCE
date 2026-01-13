@@ -78,6 +78,41 @@ class MeView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
 
+class BecomeCreatorView(generics.GenericAPIView):
+    """
+    Endpoint to upgrade a USER to CREATOR role.
+    Only allows upgrading from USER to CREATOR, not downgrading.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        
+        if user.role == User.Role.CREATOR:
+            return Response(
+                {"detail": "User is already a creator."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        if user.role != User.Role.USER:
+            return Response(
+                {"detail": "Invalid role transition."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        
+        user.role = User.Role.CREATOR
+        user.save(update_fields=["role"])
+        
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "message": "Successfully upgraded to creator.",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+
 class GoogleLoginView(generics.GenericAPIView):
     """
     Frontend obtains a Google ID token ("credential") via Google Identity Services,

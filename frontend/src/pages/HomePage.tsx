@@ -5,6 +5,7 @@ import type { Session } from '../types'
 
 function formatMoney(amount: string) {
   const n = Number(amount)
+  if (n === 0) return 'Free'
   if (Number.isFinite(n)) return n.toLocaleString(undefined, { style: 'currency', currency: 'INR' })
   return amount
 }

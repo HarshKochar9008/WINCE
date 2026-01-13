@@ -32,11 +32,19 @@ class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
     def perform_create(self, serializer):
         """Create a booking, handling duplicate booking attempts gracefully"""
         from django.db import IntegrityError
+        from decimal import Decimal
+        from rest_framework.exceptions import ValidationError
         
         try:
-            serializer.save(user=self.request.user)
+            booking = serializer.save(user=self.request.user)
+            
+            # Auto-confirm free sessions (price = 0)
+            if booking.session.price == Decimal('0'):
+                booking.status = Booking.Status.CONFIRMED
+                booking.payment_status = "free"
+                booking.amount_paid = Decimal('0')
+                booking.save()
         except IntegrityError:
-            from rest_framework.exceptions import ValidationError
             raise ValidationError(
                 {"detail": "You have already booked this session. Check your dashboard to see your existing booking."}
             )

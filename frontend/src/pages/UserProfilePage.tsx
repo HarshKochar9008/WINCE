@@ -112,6 +112,7 @@ export function UserProfilePage() {
               <div className="profile-edit-header">
                 <h2>Edit Profile</h2>
               </div>
+              
 
               <div className="profile-edit-avatar-section">
                 <div className="profile-edit-avatar-preview">

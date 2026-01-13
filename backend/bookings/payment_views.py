@@ -51,6 +51,14 @@ def create_payment_order(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Skip payment for free sessions
+    from decimal import Decimal
+    if booking.session.price == Decimal('0'):
+        return Response(
+            {"detail": "This is a free session. No payment required."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     try:
         # Get user information for Indian export compliance
         # Indian regulations require customer name and address for export transactions

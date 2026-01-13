@@ -1,13 +1,10 @@
-import { Link, NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import { 
   FaTachometerAlt, 
-  FaCalendarCheck, 
   FaCompass, 
   FaUser, 
-  FaComments,
-  FaCog,
-  FaUsers
+  FaCog
 } from 'react-icons/fa'
 import './Sidebar.css'
 

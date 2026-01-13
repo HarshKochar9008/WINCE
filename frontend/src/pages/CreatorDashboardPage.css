@@ -61,6 +61,16 @@
   transform: translateX(-2px);
 }
 
+.creator-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
 .creator-title {
   font-size: 36px;
   font-weight: 800;
@@ -73,6 +83,37 @@
   font-size: 16px;
   color: #475569;
   margin: 0;
+}
+
+.creator-add-session-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: #0066ff;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+  white-space: nowrap;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: relative;
+  z-index: 10;
+}
+
+.creator-add-session-button:hover {
+  background: #0052cc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 102, 255, 0.4);
+}
+
+.creator-add-session-button:active {
+  transform: translateY(0);
 }
 
 /* Form Section */
@@ -88,7 +129,27 @@
   font-size: 20px;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 20px 0;
+  margin: 0;
+}
+
+.creator-form-close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.creator-form-close-button:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .creator-form-field {
@@ -440,6 +501,20 @@
     padding: 24px;
   }
 
+  .creator-header-content {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .creator-add-session-button {
+    width: 100%;
+    margin-top: 8px;
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+
   .creator-title {
     font-size: 28px;
   }
@@ -457,10 +532,40 @@
   }
 }
 
+/* Floating Add Session Button */
+.creator-floating-add-button {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 32px rgba(0, 102, 255, 0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+}
+
+.creator-floating-add-button:hover {
+  transform: scale(1.1) translateY(-4px);
+  box-shadow: 0 12px 48px rgba(0, 102, 255, 0.6);
+}
+
+.creator-floating-add-button:active {
+  transform: scale(0.95);
+}
+
 /* Floating Calendar Button for Creator */
 .creator-floating-calendar-btn {
   position: fixed;
-  bottom: 32px;
+  bottom: 110px;
   right: 32px;
   width: 64px;
   height: 64px;

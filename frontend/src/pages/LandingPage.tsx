@@ -22,7 +22,7 @@ export function LandingPage() {
       <header className="landing-header">
         <div className="landing-header-inner ">
           <Link to="/" className="landing-brand">
-            <span className="brand-icon"><img style={{ position: 'relative', top: '10px', width: '60px', height: '40px' }} src="/images/Bird.png" alt="Logo" className="logo-image" /></span>
+            <span className="brand-icon"><img style={{ position: 'relative', top: '10px', width: '40px', height: '40px' }} src="/images/logo.png" alt="Logo" className="logo-image" /></span>
             Ahoum
                   </Link>
                   <div className="landing-header-right">

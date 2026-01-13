@@ -30,6 +30,11 @@ class BookingSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         session = attrs.get("session")
         user = getattr(request, "user", None)
-        if user and session and session.creator_id == user.id:
+        if not user:
+            raise serializers.ValidationError({"detail": "Authentication required."})
+        # Only creators can book sessions
+        if getattr(user, "role", None) != "CREATOR":
+            raise serializers.ValidationError({"detail": "Only creators can book sessions."})
+        if session and session.creator_id == user.id:
             raise serializers.ValidationError({"session_id": "You cannot book your own session."})
         return attrs

@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import './CreatorDashboardPage.css'
-import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes, FaArrowLeft, FaEdit, FaTrash } from 'react-icons/fa'
+import { FaCalendarAlt, FaRupeeSign, FaClock, FaCreditCard, FaMoneyBillWave, FaTimes, FaArrowLeft, FaEdit, FaTrash, FaPlus } from 'react-icons/fa'
 import { CreatorSessionCalendar } from '../components/CreatorSessionCalendar'
 
 function minutesToDuration(minutes: number) {
@@ -17,7 +17,7 @@ function minutesToDuration(minutes: number) {
 
 export function CreatorDashboardPage() {
   const navigate = useNavigate()
-  const { user, apiFetch } = useAuth()
+  const { user, apiFetch, becomeCreator } = useAuth()
 
   const [sessions, setSessions] = useState<Session[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -25,9 +25,12 @@ export function CreatorDashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [showForm, setShowForm] = useState(true)
+  const formSectionRef = useRef<HTMLDivElement>(null)
 
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [isFree, setIsFree] = useState(false)
   const [price, setPrice] = useState('499.00')
   const [image, setImage] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
@@ -87,13 +90,22 @@ export function CreatorDashboardPage() {
     setError(null)
 
     try {
+      // Check if user is authenticated and is a creator
+      if (!user) {
+        throw new Error('You must be logged in to create a session.')
+      }
+      if (user.role !== 'CREATOR') {
+        throw new Error('Only creators can create sessions. Please update your role to CREATOR.')
+      }
+
       if (!startTime) throw new Error('Start time is required')
       const startIso = new Date(startTime).toISOString()
       const duration = minutesToDuration(durationMinutes)
 
+      const sessionPrice = isFree ? '0.00' : price
       const created = await apiFetch<Session>('/api/sessions/', {
         method: 'POST',
-        body: JSON.stringify({ title, description, price, image, start_time: startIso, duration }),
+        body: JSON.stringify({ title, description, price: sessionPrice, image, start_time: startIso, duration }),
       })
       setSessions((prev) => [created, ...prev])
       setNotice('Session created.')
@@ -125,12 +137,22 @@ export function CreatorDashboardPage() {
 
       setTitle('')
       setDescription('')
+      setIsFree(false)
+      setPrice('499.00')
       setImage('')
       setImageFile(null)
+      setShowForm(false)
     } catch (e2) {
       const msg = e2 && typeof e2 === 'object' && 'message' in e2 ? String((e2 as any).message) : 'Create failed'
       setError(msg)
     }
+  }
+
+  const handleAddSessionClick = () => {
+    setShowForm(true)
+    setTimeout(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
   }
 
   async function deleteSession(sessionId: number) {
@@ -168,18 +190,55 @@ export function CreatorDashboardPage() {
         <button className="creator-back-button" onClick={() => navigate(-1)}>
           <FaArrowLeft />
         </button>
-        <h1 className="creator-title">Creator Dashboard</h1>
-        <p className="creator-subtitle">Create sessions and manage your bookings</p>
+        <div className="creator-header-content">
+          <div>
+            <h1 className="creator-title">Creator Dashboard</h1>
+            <p className="creator-subtitle">Create sessions and manage your bookings</p>
+          </div>
+          <button className="creator-add-session-button" onClick={handleAddSessionClick}>
+            <FaPlus style={{ marginRight: '8px' }} />
+            Add Session
+          </button>
+        </div>
       </div>
 
       {/* Alert Messages */}
       {isLoading && <div className="creator-alert creator-alert-info">Loading…</div>}
       {error && <div className="creator-alert creator-alert-error">Error: {error}</div>}
       {notice && <div className="creator-alert creator-alert-success">{notice}</div>}
+      {user && user.role !== 'CREATOR' && (
+        <div className="creator-alert creator-alert-error">
+          <strong>You need to be a CREATOR to create sessions.</strong>
+          <button
+            className="creator-button creator-button-primary"
+            onClick={async () => {
+              try {
+                await becomeCreator()
+                setNotice('Successfully upgraded to creator! You can now create sessions.')
+              } catch (e) {
+                const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Failed to become creator'
+                setError(msg)
+              }
+            }}
+            style={{ marginTop: '12px' }}
+          >
+            Become a Creator
+          </button>
+        </div>
+      )}
 
       {/* Create Session Form */}
-      <div className="creator-form-section">
-        <h2 className="creator-form-title">Create a Session</h2>
+      <div ref={formSectionRef} className="creator-form-section" style={{ display: showForm ? 'block' : 'none' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+          <h2 className="creator-form-title">Create a Session</h2>
+          <button
+            className="creator-form-close-button"
+            onClick={() => setShowForm(false)}
+            title="Close form"
+          >
+            <FaTimes />
+          </button>
+        </div>
         <form onSubmit={createSession}>
           <div className="creator-form-field">
             <label className="creator-form-label">Title</label>
@@ -203,6 +262,23 @@ export function CreatorDashboardPage() {
             />
           </div>
 
+          <div className="creator-form-field">
+            <label className="creator-form-label" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <input
+                type="checkbox"
+                checked={isFree}
+                onChange={(e) => {
+                  setIsFree(e.target.checked)
+                  if (e.target.checked) {
+                    setPrice('0.00')
+                  }
+                }}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <span>Free Session</span>
+            </label>
+          </div>
+
           <div className="creator-form-row">
             <div className="creator-form-field">
               <label className="creator-form-label">Price (₹)</label>
@@ -211,8 +287,10 @@ export function CreatorDashboardPage() {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 inputMode="decimal"
-                required
+                required={!isFree}
+                disabled={isFree}
                 placeholder="499.00"
+                style={isFree ? { backgroundColor: '#f1f5f9', cursor: 'not-allowed' } : {}}
               />
             </div>
 
@@ -338,7 +416,7 @@ export function CreatorDashboardPage() {
                       {uploadingImage === s.id && <span style={{ marginLeft: '12px', color: '#0066ff' }}>Uploading image…</span>}
                     </div>
                   </div>
-                  <div className="creator-session-price">₹ {s.price}</div>
+                  <div className="creator-session-price">{parseFloat(s.price) === 0 ? 'Free' : `₹ ${s.price}`}</div>
                 </Link>
                 <div className="creator-session-actions">
                   <button
@@ -392,7 +470,7 @@ export function CreatorDashboardPage() {
                       {session && (
                         <>
                           <span><FaCalendarAlt style={{ marginRight: '6px' }} />{new Date(session.start_time).toLocaleString()}</span>
-                          <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>
+                          <span>{parseFloat(session.price) === 0 ? 'Free' : <><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</>}</span>
                         </>
                       )}
                       <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleString()}</span>
@@ -411,33 +489,40 @@ export function CreatorDashboardPage() {
           </div>
         )}
       </div>
-
-      {/* Floating Calendar Icon */}
-      {mySessions.length > 0 && (
-        <button 
-          className="creator-floating-calendar-btn"
+      <button 
+          className="vertical-calendar-btn"
           onClick={() => setShowCalendar(true)}
           title="Open Calendar"
         >
-          <FaCalendarAlt />
+          <span className="vertical-text">CALENDAR</span>
+        </button>
+
+      {/* Floating Add Session Button */}
+      {user?.role === 'CREATOR' && (
+        <button 
+          className="creator-floating-add-button"
+          onClick={handleAddSessionClick}
+          title="Add New Session"
+          aria-label="Add Session"
+        >
+          <FaPlus />
         </button>
       )}
 
-      {/* Calendar Drawer Overlay */}
       {showCalendar && (
-        <div className="creator-calendar-drawer-overlay" onClick={() => setShowCalendar(false)}>
-          <div className="creator-calendar-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="creator-calendar-drawer-header">
+        <div className="calendar-drawer-overlay" onClick={() => setShowCalendar(false)}>
+          <div className="calendar-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="calendar-drawer-header">
               <h2>Session Calendar</h2>
               <button 
-                className="creator-calendar-drawer-close"
+                className="calendar-drawer-close"
                 onClick={() => setShowCalendar(false)}
                 title="Close Calendar"
               >
                 <FaTimes />
               </button>
             </div>
-            <div className="creator-calendar-drawer-content">
+            <div className="calendar-drawer-content">
               <CreatorSessionCalendar sessions={mySessions} />
             </div>
           </div>

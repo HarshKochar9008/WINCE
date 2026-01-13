@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 import type { Booking, Session } from '../types'
 import './UserDashboardPage.css'
@@ -9,8 +9,7 @@ import { SessionCalendar } from '../components/SessionCalendar'
 import { Sidebar } from '../components/Sidebar'
 
 export function UserDashboardPage() {
-  const navigate = useNavigate()
-  const { user, apiFetch } = useAuth()
+  const { user, apiFetch, becomeCreator } = useAuth()
   const [bookings, setBookings] = useState<Booking[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -19,6 +18,8 @@ export function UserDashboardPage() {
   const [paymentError, setPaymentError] = useState<{ [key: number]: string }>({})
   const [showCalendar, setShowCalendar] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [creatorLoading, setCreatorLoading] = useState(false)
+  const [creatorError, setCreatorError] = useState<string | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -150,6 +151,20 @@ export function UserDashboardPage() {
     }
   }
 
+  async function handleBecomeCreator() {
+    setCreatorError(null)
+    setCreatorLoading(true)
+    try {
+      await becomeCreator()
+      // Optionally redirect to creator dashboard or show success message
+    } catch (e) {
+      const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Failed to upgrade to creator'
+      setCreatorError(msg)
+    } finally {
+      setCreatorLoading(false)
+    }
+  }
+
   return (
     <div className="dashboard-with-sidebar">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -169,7 +184,7 @@ export function UserDashboardPage() {
                 <h1 className="dashboard-title">Dashboard</h1>
                 <p className="dashboard-subtitle">Hi, {user?.name}</p>
               </div>
-              <button className="dashboard-start-button" onClick={() => navigate('/explore')}>
+              <button className="dashboard-start-button" onClick={() => window.location.href = '/explore'}>
                 Book Now
               </button>
             </div>
@@ -215,6 +230,48 @@ export function UserDashboardPage() {
           </div>
         </div>
 
+        {user?.role === 'USER' && (
+          <div className="dashboard-become-creator-section">
+            <div className="dashboard-become-creator-content">
+              <div className="dashboard-become-creator-text">
+                <h3 className="dashboard-become-creator-title">Want to host your own sessions?</h3>
+                <p className="dashboard-become-creator-description">
+                  Become a creator and start hosting sessions for others to book.
+                </p>
+              </div>
+              <button
+                className="dashboard-become-creator-button"
+                onClick={handleBecomeCreator}
+                disabled={creatorLoading}
+              >
+                {creatorLoading ? 'Upgrading...' : 'Become a Creator'}
+              </button>
+            </div>
+            {creatorError && (
+              <div className="dashboard-creator-error">
+                {creatorError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {user?.role === 'CREATOR' && (
+          <div className="dashboard-become-creator-section">
+            <div className="dashboard-become-creator-content">
+              <div className="dashboard-become-creator-text">
+                <h3 className="dashboard-become-creator-title">Ready to create sessions?</h3>
+                <p className="dashboard-become-creator-description">
+                  Go to your Creator Dashboard to add and manage your sessions.
+                </p>
+              </div>
+              <Link to="/creator">
+                <button className="dashboard-become-creator-button">
+                  Go to Creator Dashboard
+                </button>
+              </Link>
+            </div>
+          </div>
+        )}
 
       </div>
 
@@ -253,7 +310,7 @@ export function UserDashboardPage() {
                       </div>
                       <div className="dashboard-booking-meta">
                         {startTime && <span><FaCalendarAlt style={{ marginRight: '6px' }} />{startTime.toLocaleString()}</span>}
-                        {session && <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>}
+                        {session && <span>{parseFloat(session.price) === 0 ? 'Free' : <><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</>}</span>}
                         <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleDateString()}</span>
                         {b.payment_status && <span><FaCreditCard style={{ marginRight: '6px' }} />{b.payment_status}</span>}
                         {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
@@ -303,7 +360,7 @@ export function UserDashboardPage() {
                     </div>
                     <div className="dashboard-booking-meta">
                       {startTime && <span><FaCalendarAlt style={{ marginRight: '6px' }} />{startTime.toLocaleString()}</span>}
-                      {session && <span><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</span>}
+                      {session && <span>{parseFloat(session.price) === 0 ? 'Free' : <><FaRupeeSign style={{ marginRight: '6px' }} />₹{session.price}</>}</span>}
                       <span><FaClock style={{ marginRight: '6px' }} />Booked {new Date(b.created_at).toLocaleDateString()}</span>
                       {b.payment_status && <span><FaCreditCard style={{ marginRight: '6px' }} />{b.payment_status}</span>}
                       {b.amount_paid && <span><FaMoneyBillWave style={{ marginRight: '6px' }} />Paid: ₹{b.amount_paid}</span>}
@@ -333,7 +390,7 @@ export function UserDashboardPage() {
       {bookings.length === 0 && !isLoading && (
         <div className="dashboard-empty-state">
           <h3>No bookings yet</h3>
-          <p>Start exploring and book your first session!</p>
+          <p>Start exploring and browse sessions!</p>
           <Link to="/explore" className="dashboard-action-button primary dashboard-empty-cta">
             Browse Sessions
           </Link>
