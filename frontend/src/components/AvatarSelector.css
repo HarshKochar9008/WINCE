@@ -17,16 +17,23 @@
 }
 
 .avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: 12px;
-  max-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
 }
 
 .avatar-option {
   position: relative;
   width: 80px;
   height: 80px;
+  min-width: 80px;
+  min-height: 80px;
   padding: 0;
   border: 3px solid #e2e8f0;
   border-radius: 50%;
@@ -37,6 +44,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .avatar-option:hover {
@@ -47,6 +55,7 @@
 .avatar-option.selected {
   border-color: #0066ff;
   box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.2);
+  transform: none;
 }
 
 .avatar-option img {
@@ -75,12 +84,13 @@
 
 @media (max-width: 768px) {
   .avatar-grid {
-    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     gap: 10px;
   }
 
   .avatar-option {
     width: 60px;
     height: 60px;
+    min-width: 60px;
+    min-height: 60px;
   }
 }

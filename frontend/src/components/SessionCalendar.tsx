@@ -145,7 +145,6 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
 
   return (
     <div className="session-calendar">
-      {
       <div className="calendar-header">
         <div className="calendar-header-left">
           <h2 className="calendar-title">
@@ -169,7 +168,6 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {
       <div className="calendar-legend">
         <div className="legend-item">
           <span className="legend-dot booked"></span>
@@ -181,21 +179,17 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {
       <div className="calendar-grid">
-        {
         {dayNames.map((day) => (
           <div key={day} className="calendar-day-name">
             {day}
           </div>
         ))}
 
-        {
         {Array.from({ length: startingDayOfWeek }).map((_, index) => (
           <div key={`empty-${index}`} className="calendar-day empty"></div>
         ))}
 
-        {
         {Array.from({ length: daysInMonth }).map((_, index) => {
           const day = index + 1
           const dayEvents = getEventsForDay(day)
@@ -245,7 +239,6 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         })}
       </div>
 
-      {
       {selectedEvent && (
         <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="event-modal" onClick={(e) => e.stopPropagation()}>

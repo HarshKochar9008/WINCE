@@ -118,7 +118,6 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
 
   return (
     <div className="creator-session-calendar">
-      {
       <div className="creator-calendar-header">
         <div className="creator-calendar-header-left">
           <h2 className="creator-calendar-title">
@@ -142,7 +141,6 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
         </div>
       </div>
 
-      {
       <div className="creator-calendar-legend">
         <div className="creator-legend-item">
           <span className="creator-legend-dot upcoming"></span>
@@ -153,26 +151,19 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
           <span>Past Sessions</span>
         </div>
       </div>
-
-      {
+      
       <div className="creator-calendar-grid">
-        {
         {dayNames.map((day) => (
           <div key={day} className="creator-calendar-day-name">
             {day}
           </div>
         ))}
-
-        {
         {Array.from({ length: startingDayOfWeek }).map((_, index) => (
           <div key={`empty-${index}`} className="creator-calendar-day empty"></div>
         ))}
-
-        {
         {Array.from({ length: daysInMonth }).map((_, index) => {
           const day = index + 1
           const dayEvents = getEventsForDay(day)
-          
           return (
             <div
               key={day}
@@ -210,7 +201,6 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
         })}
       </div>
 
-      {
       {selectedEvent && (
         <div className="creator-event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="creator-event-modal" onClick={(e) => e.stopPropagation()}>

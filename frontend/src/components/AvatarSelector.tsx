@@ -23,7 +23,7 @@ export function AvatarSelector({ selectedAvatar, onSelectAvatar }: AvatarSelecto
       <label className="avatar-selector-label">
         <span>Choose Your Avatar</span>
       </label>
-      <div style={{ display: 'flex', gridTemplateColumns: 'repeat(3, 1fr)', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }} className="avatar-grid">
+      <div className="avatar-grid">
         {AVATARS.map((avatar) => (
           <button
             key={avatar}
