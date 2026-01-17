@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ? body.detail
           : null) ?? `Request failed (${res.status})`
       
-      
+      // For 500 errors, provide more context if available
       if (res.status === 500) {
         const errorText = body && typeof body === 'object' && body !== null && 'error' in body && typeof body.error === 'string'
           ? body.error
@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         if (accessToken) await fetchMe()
       } catch {
-        
+        // If access is stale, try refresh once.
         const ok = await refreshSession()
         if (ok) {
           try {
@@ -225,7 +225,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       isMounted = false
     }
-    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const value = useMemo<AuthContextValue>(

@@ -145,7 +145,7 @@ export function ExploreSessionsPage() {
 
   const canBookSession = (session: Session) => {
     if (!user) return false
-    
+    // Users and creators can book sessions, but creators cannot book their own sessions
     if (user.role === 'CREATOR' && session.creator === user.id) return false
     return true
   }
@@ -162,11 +162,11 @@ export function ExploreSessionsPage() {
         body: JSON.stringify({ session_id: session.id }),
       })
 
-      
+      // Check if session is free (price = 0)
       const isFreeSession = parseFloat(session.price) === 0
       
       if (isFreeSession) {
-        
+        // Free sessions are auto-confirmed, no payment needed
         setBookingStatus((prev) => ({
           ...prev,
           [session.id]: 'Booked successfully! This is a free session.',
@@ -185,14 +185,14 @@ export function ExploreSessionsPage() {
           body: JSON.stringify({ booking_id: booking.id }),
         })
 
-        
+        // Load Stripe and redirect to checkout
         const stripe = await loadStripe(checkoutSession.publishable_key)
         
         if (!stripe) {
           throw new Error('Failed to load Stripe')
         }
 
-        
+        // Redirect to Stripe Checkout
         const { error } = await stripe.redirectToCheckout({
           sessionId: checkoutSession.session_id,
         })

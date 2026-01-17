@@ -33,7 +33,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
-  
+  // Convert sessions to calendar events
   const events = useMemo(() => {
     const calendarEvents: CalendarEvent[] = sessions.map((session) => ({
       id: session.id,
@@ -48,7 +48,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
     return calendarEvents
   }, [sessions])
 
-  
+  // Calendar calculations
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   
@@ -64,7 +64,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-  
+  // Get events for a specific day
   const getEventsForDay = (day: number) => {
     return events.filter((event) => {
       const eventDate = event.startTime
@@ -76,7 +76,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
     })
   }
 
-  
+  // Navigation
   const goToPreviousMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1))
   }
@@ -89,7 +89,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
     setCurrentDate(new Date())
   }
 
-  
+  // Format duration
   const formatDuration = (duration: string) => {
     const match = duration.match(/(\d+):(\d+):(\d+)/)
     if (match) {
@@ -101,7 +101,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
     return duration
   }
 
-  
+  // Check if date is today
   const isToday = (day: number) => {
     const today = new Date()
     return (
@@ -111,14 +111,14 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
     )
   }
 
-  
+  // Check if event is in the past
   const isPast = (event: CalendarEvent) => {
     return event.startTime < new Date()
   }
 
   return (
     <div className="creator-session-calendar">
-      {
+      {/* Calendar Header */}
       <div className="creator-calendar-header">
         <div className="creator-calendar-header-left">
           <h2 className="creator-calendar-title">
@@ -142,7 +142,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
         </div>
       </div>
 
-      {
+      {/* Legend */}
       <div className="creator-calendar-legend">
         <div className="creator-legend-item">
           <span className="creator-legend-dot upcoming"></span>
@@ -154,21 +154,21 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
         </div>
       </div>
 
-      {
+      {/* Calendar Grid */}
       <div className="creator-calendar-grid">
-        {
+        {/* Day names */}
         {dayNames.map((day) => (
           <div key={day} className="creator-calendar-day-name">
             {day}
           </div>
         ))}
 
-        {
+        {/* Empty cells before first day */}
         {Array.from({ length: startingDayOfWeek }).map((_, index) => (
           <div key={`empty-${index}`} className="creator-calendar-day empty"></div>
         ))}
 
-        {
+        {/* Days */}
         {Array.from({ length: daysInMonth }).map((_, index) => {
           const day = index + 1
           const dayEvents = getEventsForDay(day)
@@ -210,7 +210,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
         })}
       </div>
 
-      {
+      {/* Event Detail Modal */}
       {selectedEvent && (
         <div className="creator-event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="creator-event-modal" onClick={(e) => e.stopPropagation()}>
@@ -280,7 +280,7 @@ export function CreatorSessionCalendar({ sessions }: CreatorSessionCalendarProps
                 <button
                   className="creator-modal-action-btn edit"
                   onClick={() => {
-                    
+                    // TODO: Navigate to edit page when implemented
                     alert('Edit functionality coming soon!')
                     setSelectedEvent(null)
                   }}

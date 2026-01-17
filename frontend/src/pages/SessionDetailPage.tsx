@@ -25,7 +25,7 @@ export function SessionDetailPage() {
         const data = await apiFetch<Session>(`/api/sessions/${sessionId}/`, { method: 'GET' }, { skipAuth: true })
         if (mounted) setSession(data)
 
-        
+        // Check if user already has a booking for this session
         if (user) {
           try {
             const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
@@ -37,7 +37,7 @@ export function SessionDetailPage() {
               setExistingBooking(existing)
             }
           } catch (e) {
-            
+            // Ignore errors fetching bookings
           }
         }
       } catch (e) {
@@ -54,13 +54,13 @@ export function SessionDetailPage() {
 
   const canBook = useMemo(() => {
     if (!user || !session) return false
-    
+    // Users and creators can book sessions, but creators cannot book their own sessions
     if (user.role === 'CREATOR' && session.creator === user.id) return false
     return true
   }, [user, session])
 
   async function book() {
-    
+    // Check if already booked
     if (existingBooking) {
       setBookingStatus(`You already have a ${existingBooking.status.toLowerCase()} booking for this session. Check your dashboard.`)
       return
@@ -69,21 +69,21 @@ export function SessionDetailPage() {
     setBookingStatus(null)
     setIsProcessingPayment(true)
     try {
-      
+      // Create booking
       const booking = await apiFetch<Booking>('/api/bookings/', {
         method: 'POST',
         body: JSON.stringify({ session_id: sessionId }),
       })
       setExistingBooking(booking)
 
-      
+      // Check if session is free (price = 0)
       const isFreeSession = session && parseFloat(session.price) === 0
       
       if (isFreeSession) {
-        
+        // Free sessions are auto-confirmed, no payment needed
         setBookingStatus('Booked successfully! This is a free session.')
         setIsProcessingPayment(false)
-        
+        // Refresh to get the updated booking status
         try {
           const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
           const existing = bookings.find(b => {
@@ -95,7 +95,7 @@ export function SessionDetailPage() {
         return
       }
 
-      
+      // Create Stripe Checkout Session for paid sessions
       try {
         const checkoutSession = await apiFetch<{
           session_id: string
@@ -106,14 +106,14 @@ export function SessionDetailPage() {
           body: JSON.stringify({ booking_id: booking.id }),
         })
 
-        
+        // Load Stripe and redirect to checkout
         const stripe = await loadStripe(checkoutSession.publishable_key)
         
         if (!stripe) {
           throw new Error('Failed to load Stripe')
         }
 
-        
+        // Redirect to Stripe Checkout
         const { error } = await stripe.redirectToCheckout({
           sessionId: checkoutSession.session_id,
         })
@@ -123,7 +123,7 @@ export function SessionDetailPage() {
           setIsProcessingPayment(false)
         }
       } catch (paymentError) {
-        
+        // If payment gateway is not configured, just confirm booking
         const msg =
           paymentError && typeof paymentError === 'object' && 'message' in paymentError
             ? String((paymentError as any).message)
@@ -138,10 +138,10 @@ export function SessionDetailPage() {
     } catch (e) {
       const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Booking failed'
       
-      
+      // Check if it's a duplicate booking error
       if (msg.includes('already booked')) {
         setBookingStatus('You have already booked this session. Check your dashboard to see your existing booking.')
-        
+        // Refresh to show the existing booking
         try {
           const bookings = await apiFetch<Booking[]>('/api/bookings/', { method: 'GET' })
           const existing = bookings.find(b => {

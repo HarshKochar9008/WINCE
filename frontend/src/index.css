@@ -114,7 +114,7 @@ a {
   align-items: center;
 }
 
-
+/* Mobile Menu Button */
 .mobile-menu-button {
   display: none;
   background: none;
@@ -133,7 +133,7 @@ a {
   background-color: #e2e8f0;
 }
 
-
+/* Mobile Menu */
 .mobile-menu {
   display: none;
   position: absolute;
@@ -216,7 +216,7 @@ a {
   color: #64748b;
 }
 
-
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .nav-right {
     display: none;
@@ -243,7 +243,7 @@ a {
     height: 20px;
   }
 
-  
+  /* Adjust dropdown for mobile */
   .avatar-dropdown {
     display: none;
   }
@@ -281,7 +281,7 @@ a {
   color: #0f172a;
 }
 
-
+/* Avatar Dropdown Styles */
 .avatar-dropdown {
   position: relative;
   z-index: 10000;
@@ -587,7 +587,7 @@ textarea {
   border: 1px solid #e2e8f0;
 }
 
-
+/* Dashboard Styles */
 .dashboard-container {
   padding: 24px 0;
   max-width: 1400px;
@@ -865,7 +865,7 @@ textarea {
   width: 100%;
 }
 
-
+/* Login Page Styles */
 .login-container {
   min-height: calc(100vh - 80px);
   display: flex;
@@ -988,7 +988,7 @@ textarea {
   border: 1px dashed #cbd5e1;
 }
 
-
+/* Floating Images for Login/Signup Pages */
 .floating-image {
   position: absolute;
   opacity: 0.85;
@@ -999,7 +999,7 @@ textarea {
   height: auto;
 }
 
-
+/* Login Page - Randomized Positions */
 .floating-boat {
   top: 12%;
   left: 8%;
@@ -1021,7 +1021,7 @@ textarea {
   --initial-rotate: 10deg;
 }
 
-
+/* Signup Page - Different Randomized Positions */
 .floating-boat-signup {
   top: 8%;
   right: 12%;

@@ -156,7 +156,7 @@ export function UserDashboardPage() {
     setCreatorLoading(true)
     try {
       await becomeCreator()
-      
+      // Optionally redirect to creator dashboard or show success message
     } catch (e) {
       const msg = e && typeof e === 'object' && 'message' in e ? String((e as any).message) : 'Failed to upgrade to creator'
       setCreatorError(msg)

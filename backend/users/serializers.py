@@ -1,13 +1,16 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+
 User = get_user_model()
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "email", "name", "avatar", "role")
         read_only_fields = ("id", "email", "role")
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -32,7 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
 
     def validate_email(self, value):
-        
+        """Validate email format and check for uniqueness."""
         if not value:
             raise serializers.ValidationError("Email is required.")
         value = value.lower().strip()
@@ -43,12 +46,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_password(self, value):
-        
+        """Validate password strength."""
         if not value:
             raise serializers.ValidationError("Password is required.")
         if len(value) < 8:
             raise serializers.ValidationError("Password must be at least 8 characters long.")
-
+        # Check for at least one letter and one number
         has_letter = any(c.isalpha() for c in value)
         has_digit = any(c.isdigit() for c in value)
         if not (has_letter and has_digit):
@@ -58,7 +61,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate_name(self, value):
-        
+        """Validate name field."""
         if not value:
             raise serializers.ValidationError("Name is required.")
         if not isinstance(value, str):
@@ -71,30 +74,34 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def validate(self, attrs):
-        
-
+        """Additional validation for the entire serializer."""
+        # Ensure role defaults to USER if not provided
         if "role" not in attrs or not attrs.get("role"):
             attrs["role"] = User.Role.USER
         return attrs
 
     def create(self, validated_data):
-        
+        """Create a new user with hashed password."""
         password = validated_data.pop("password")
-
+        # Ensure role defaults to USER if not provided
         validated_data.setdefault("role", User.Role.USER)
         user = User.objects.create_user(password=password, **validated_data)
         return user
+
 
 class GoogleAuthCodeSerializer(serializers.Serializer):
     code = serializers.CharField()
     redirect_uri = serializers.CharField(required=False, allow_blank=True)
     code_verifier = serializers.CharField(required=False, allow_blank=True)
 
+
 class GoogleIdTokenSerializer(serializers.Serializer):
     credential = serializers.CharField()
 
+
 class GitHubAccessTokenSerializer(serializers.Serializer):
     access_token = serializers.CharField(required=False)
+
 
 class GitHubCodeSerializer(serializers.Serializer):
     code = serializers.CharField()

@@ -1,4 +1,7 @@
-
+"""
+Management command to create a single detailed session with dummy data
+Includes description, timing details, and is ready for booking with Razorpay integration
+"""
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -8,6 +11,7 @@ from decimal import Decimal
 from sessions.models import Session
 
 User = get_user_model()
+
 
 class Command(BaseCommand):
     help = 'Create a single detailed session with dummy data, description, and timing options for booking with Razorpay'
@@ -43,6 +47,7 @@ class Command(BaseCommand):
         price = Decimal(str(options.get('price')))
         days = options.get('days')
 
+        # Get or create creator user
         if email:
             user, created = User.objects.get_or_create(
                 email=email,
@@ -54,7 +59,7 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.SUCCESS(f'Created creator user: {email}'))
         else:
-
+            # Get first user with CREATOR role, or create a default one
             user = User.objects.filter(role=User.Role.CREATOR).first()
             if not user:
                 user = User.objects.first()
@@ -63,7 +68,7 @@ class Command(BaseCommand):
                     user.save()
                     self.stdout.write(self.style.WARNING(f'Updated user {user.email} to CREATOR role'))
             if not user:
-
+                # Create a default user
                 user = User.objects.create_user(
                     email='creator@example.com',
                     name='Demo Creator',
@@ -74,11 +79,49 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f'Using creator: {user.email} ({user.name})'))
 
-        description = .strip()
+        # Detailed session description
+        description = """
+Welcome to the Advanced Web Development Masterclass! This comprehensive session is designed for developers who want to take their web development skills to the next level.
 
-        start_time = timezone.now() + timedelta(days=days, hours=14)
-        duration = timedelta(hours=3, minutes=30)
+**What You'll Learn:**
+• Modern JavaScript (ES6+) and TypeScript fundamentals
+• React.js advanced patterns and state management
+• Server-side rendering with Next.js
+• RESTful API design and GraphQL integration
+• Database optimization and caching strategies
+• Authentication and authorization best practices
+• Deployment strategies for production applications
+• Performance optimization techniques
 
+**Who Should Attend:**
+• Intermediate to advanced developers
+• Full-stack developers looking to enhance their skills
+• Developers preparing for technical interviews
+• Team leads wanting to stay updated with modern practices
+
+**Session Format:**
+• Live coding demonstrations
+• Interactive Q&A sessions
+• Hands-on exercises with code examples
+• Access to session recordings and resources
+• Certificate of completion
+
+**Materials Included:**
+• Complete source code repository
+• Comprehensive documentation and guides
+• Pre-session preparation materials
+• Post-session follow-up resources
+
+This session will be conducted via live video conference. You'll receive the meeting link 24 hours before the session starts. All attendees will have lifetime access to the recorded session and materials.
+
+Book now to secure your spot - limited seats available!
+        """.strip()
+
+        # Calculate timing
+        start_time = timezone.now() + timedelta(days=days, hours=14)  # 2 PM, N days from now
+        duration = timedelta(hours=3, minutes=30)  # 3.5 hours session
+
+        # Create session
         session = Session.objects.create(
             title=title,
             description=description,

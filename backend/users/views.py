@@ -11,25 +11,32 @@ from .serializers import GitHubAccessTokenSerializer, GitHubCodeSerializer, Goog
 
 User = get_user_model()
 
+
 class LoginThrottle(throttling.AnonRateThrottle):
     rate = "5/minute"
+
 
 class RegisterThrottle(throttling.AnonRateThrottle):
     rate = "10/hour"
 
+
 class RegisterView(generics.CreateAPIView):
-    
+    """
+    User registration endpoint.
+    Creates a new user account with email, name, and password.
+    Returns user data and JWT tokens upon successful registration.
+    """
 
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
     throttle_classes = [RegisterThrottle]
 
     def create(self, request, *args, **kwargs):
-        
+        """Override create to return JWT tokens after registration."""
         serializer = self.get_serializer(data=request.data)
-
+        
         if not serializer.is_valid():
-
+            # Return detailed validation errors
             return Response(
                 {
                     "detail": "Validation failed",
@@ -37,10 +44,11 @@ class RegisterView(generics.CreateAPIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         try:
             user = serializer.save()
 
+            # Generate JWT tokens for the newly registered user
             refresh = RefreshToken.for_user(user)
             access = refresh.access_token
 
@@ -54,7 +62,7 @@ class RegisterView(generics.CreateAPIView):
                 status=status.HTTP_201_CREATED,
             )
         except Exception as e:
-
+            # Handle any unexpected errors during user creation
             return Response(
                 {
                     "detail": f"Error creating user: {str(e)}",
@@ -62,35 +70,40 @@ class RegisterView(generics.CreateAPIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+
 class MeView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
 
     def get_object(self):
         return self.request.user
 
+
 class BecomeCreatorView(generics.GenericAPIView):
-    
+    """
+    Endpoint to upgrade a USER to CREATOR role.
+    Only allows upgrading from USER to CREATOR, not downgrading.
+    """
 
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         user = request.user
-
+        
         if user.role == User.Role.CREATOR:
             return Response(
                 {"detail": "User is already a creator."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         if user.role != User.Role.USER:
             return Response(
                 {"detail": "Invalid role transition."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        
         user.role = User.Role.CREATOR
         user.save(update_fields=["role"])
-
+        
         return Response(
             {
                 "user": UserSerializer(user).data,
@@ -99,8 +112,12 @@ class BecomeCreatorView(generics.GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
+
 class GoogleLoginView(generics.GenericAPIView):
-    
+    """
+    Frontend obtains a Google ID token ("credential") via Google Identity Services,
+    then exchanges it here for our app's JWT (SimpleJWT).
+    """
 
     serializer_class = GoogleIdTokenSerializer
     permission_classes = [permissions.AllowAny]
@@ -140,6 +157,7 @@ class GoogleLoginView(generics.GenericAPIView):
             defaults={"name": name, "avatar": avatar},
         )
 
+        # Keep profile info reasonably fresh (don't clobber custom name/avatar if already set).
         changed = False
         if created:
             changed = True
@@ -166,24 +184,29 @@ class GoogleLoginView(generics.GenericAPIView):
             status=status.HTTP_200_OK,
         )
 
+
 class GitHubLoginView(generics.GenericAPIView):
-    
+    """
+    Frontend obtains a GitHub authorization code via GitHub OAuth redirect,
+    then exchanges it here for our app's JWT (SimpleJWT).
+    Supports both authorization code and access token flows.
+    """
 
     permission_classes = [permissions.AllowAny]
     throttle_classes = [LoginThrottle]
 
     def post(self, request, *args, **kwargs):
-
+        # Check if we have a code (OAuth flow) or access_token (direct token)
         code = request.data.get("code")
         access_token = request.data.get("access_token")
 
         if code:
-
+            # Exchange authorization code for access token
             serializer = GitHubCodeSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             access_token = self._exchange_code_for_token(code)
         elif access_token:
-
+            # Use provided access token directly
             serializer = GitHubAccessTokenSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
         else:
@@ -199,15 +222,16 @@ class GitHubLoginView(generics.GenericAPIView):
             )
 
         try:
-
+            # Verify token and get user info from GitHub API
             headers = {"Authorization": f"token {access_token}"}
             user_response = requests.get("https://api.github.com/user", headers=headers, timeout=10)
             user_response.raise_for_status()
             github_user = user_response.json()
 
+            # Get email (may need to fetch from email endpoint if not in user response)
             email = github_user.get("email")
             if not email:
-
+                # Try to get email from GitHub email endpoint
                 email_response = requests.get("https://api.github.com/user/emails", headers=headers, timeout=10)
                 if email_response.status_code == 200:
                     emails = email_response.json()
@@ -231,6 +255,7 @@ class GitHubLoginView(generics.GenericAPIView):
                 defaults={"name": name, "avatar": avatar},
             )
 
+            # Keep profile info reasonably fresh (don't clobber custom name/avatar if already set).
             changed = False
             if created:
                 changed = True
@@ -268,7 +293,7 @@ class GitHubLoginView(generics.GenericAPIView):
             )
 
     def _exchange_code_for_token(self, code: str) -> str | None:
-        
+        """Exchange GitHub authorization code for access token."""
         if not getattr(settings, "GITHUB_OAUTH_CLIENT_ID", "") or not getattr(settings, "GITHUB_OAUTH_CLIENT_SECRET", ""):
             return None
 

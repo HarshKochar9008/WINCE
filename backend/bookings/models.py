@@ -3,6 +3,7 @@ from django.db import models
 
 from sessions.models import Session
 
+
 class Booking(models.Model):
     class Status(models.TextChoices):
         PENDING = "PENDING", "PENDING"

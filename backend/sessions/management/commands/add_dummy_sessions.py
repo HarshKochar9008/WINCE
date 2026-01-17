@@ -8,6 +8,7 @@ from sessions.models import Session
 
 User = get_user_model()
 
+
 class Command(BaseCommand):
     help = 'Add dummy sessions to the database for a user'
 
@@ -28,6 +29,7 @@ class Command(BaseCommand):
         email = options.get('email')
         count = options.get('count', 5)
 
+        # Get or create user
         if email:
             user, created = User.objects.get_or_create(
                 email=email,
@@ -39,7 +41,7 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(self.style.SUCCESS(f'Created user: {email}'))
         else:
-
+            # Get first user with CREATOR role, or create a default one
             user = User.objects.filter(role=User.Role.CREATOR).first()
             if not user:
                 user = User.objects.first()
@@ -48,7 +50,7 @@ class Command(BaseCommand):
                     user.save()
                     self.stdout.write(self.style.WARNING(f'Updated user {user.email} to CREATOR role'))
             if not user:
-
+                # Create a default user
                 user = User.objects.create_user(
                     email='creator@example.com',
                     name='Demo Creator',
@@ -59,6 +61,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(f'Using user: {user.email}'))
 
+        # Dummy session data
         dummy_sessions = [
             {
                 'title': 'Introduction to Web Development',
@@ -119,7 +122,7 @@ class Command(BaseCommand):
         ]
 
         created_count = 0
-        base_time = timezone.now() + timedelta(days=7)
+        base_time = timezone.now() + timedelta(days=7)  # Start sessions 7 days from now
 
         for i in range(count):
             session_data = dummy_sessions[i % len(dummy_sessions)]

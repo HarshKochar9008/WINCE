@@ -2,10 +2,14 @@ from datetime import timedelta
 import os
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 def _load_env_file(path: Path) -> None:
-    
+    """
+    Lightweight `.env` loader to avoid extra dependencies.
+    Only sets variables that are not already present in `os.environ`.
+    """
 
     try:
         if not path.exists():
@@ -20,9 +24,13 @@ def _load_env_file(path: Path) -> None:
             if key and key not in os.environ:
                 os.environ[key] = value
     except Exception:
-
+        # Don't break app startup due to a malformed local `.env`.
         return
 
+
+# Load environment variables from local `.env` files for dev convenience.
+# - `backend/.env` is ideal for running the backend directly.
+# - repo-root `.env` is convenient for `docker-compose` and mono-repo setups.
 _load_env_file(BASE_DIR / ".env")
 _load_env_file(BASE_DIR.parent / ".env")
 
@@ -138,12 +146,15 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+# Allow the Vite dev server (default port 5173) to call this API from the browser.
+# In production, tighten this to your deployed frontend origin(s).
 CORS_ALLOWED_ORIGINS = [
     o.strip()
     for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
     if o.strip()
 ]
 
+# CORS additional settings
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -163,17 +174,24 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
+# Respect proxy headers from Render/other PaaS providers.
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
-
+# Google Identity Services (frontend receives an ID token, backend verifies and exchanges for our JWT)
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
 
+# GitHub OAuth (frontend obtains access token, backend verifies with GitHub API)
+GITHUB_OAUTH_CLIENT_ID = os.getenv("GITHUB_OAUTH_CLIENT_ID", "")
+GITHUB_OAUTH_CLIENT_SECRET = os.getenv("GITHUB_OAUTH_CLIENT_SECRET", "")
+
+# Stripe Payment Gateway
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+# Frontend URL for Stripe redirect (success/cancel)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+# S3/MinIO Storage (optional, falls back to local media if not configured)
 USE_S3 = os.getenv("USE_S3", "0") == "1"
 if USE_S3:
     STORAGES = {
@@ -187,7 +205,7 @@ if USE_S3:
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "")  # For MinIO, e.g., http://minio:9000
     AWS_S3_USE_SSL = os.getenv("AWS_S3_USE_SSL", "1") == "1"
     AWS_S3_VERIFY = os.getenv("AWS_S3_VERIFY", "1") == "1"
     AWS_DEFAULT_ACL = "public-read"

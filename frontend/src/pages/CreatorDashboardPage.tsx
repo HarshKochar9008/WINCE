@@ -90,7 +90,7 @@ export function CreatorDashboardPage() {
     setError(null)
 
     try {
-      
+      // Check if user is authenticated and is a creator
       if (!user) {
         throw new Error('You must be logged in to create a session.')
       }
@@ -110,7 +110,7 @@ export function CreatorDashboardPage() {
       setSessions((prev) => [created, ...prev])
       setNotice('Session created.')
 
-      
+      // Upload image file if provided
       if (imageFile && created.id) {
         setUploadingImage(created.id)
         try {
@@ -185,7 +185,7 @@ export function CreatorDashboardPage() {
 
   return (
     <div className="creator-dashboard-modern">
-      {
+      {/* Header Section */}
       <div className="creator-header-section">
         <button className="creator-back-button" onClick={() => navigate(-1)}>
           <FaArrowLeft />
@@ -202,7 +202,7 @@ export function CreatorDashboardPage() {
         </div>
       </div>
 
-      {
+      {/* Alert Messages */}
       {isLoading && <div className="creator-alert creator-alert-info">Loading…</div>}
       {error && <div className="creator-alert creator-alert-error">Error: {error}</div>}
       {notice && <div className="creator-alert creator-alert-success">{notice}</div>}
@@ -227,7 +227,7 @@ export function CreatorDashboardPage() {
         </div>
       )}
 
-      {
+      {/* Create Session Form */}
       <div ref={formSectionRef} className="creator-form-section" style={{ display: showForm ? 'block' : 'none' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 className="creator-form-title">Create a Session</h2>
@@ -373,7 +373,7 @@ export function CreatorDashboardPage() {
         </form>
       </div>
 
-      {
+      {/* Booking Overview Stats */}
       {mySessions.length > 0 && (
         <div className="creator-stats-section">
           <h2 className="creator-section-title">Booking Overview</h2>
@@ -399,7 +399,7 @@ export function CreatorDashboardPage() {
       )}
 
 
-      {
+      {/* My Sessions */}
       <div className="creator-sessions-section">
         <h2 className="creator-section-title">My Sessions ({mySessions.length})</h2>
         {mySessions.length === 0 ? (
@@ -445,7 +445,7 @@ export function CreatorDashboardPage() {
         )}
       </div>
 
-      {
+      {/* Bookings */}
       <div className="creator-bookings-section">
         <h2 className="creator-section-title">Bookings on My Sessions ({bookingsForMySessions.length})</h2>
         {bookingsForMySessions.length === 0 ? (
@@ -497,7 +497,7 @@ export function CreatorDashboardPage() {
           <span className="vertical-text">CALENDAR</span>
         </button>
 
-      {
+      {/* Floating Add Session Button */}
       {user?.role === 'CREATOR' && (
         <button 
           className="creator-floating-add-button"
