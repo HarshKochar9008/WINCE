@@ -2,6 +2,7 @@ import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../state/auth/AuthContext'
 
+
 export function CreatorRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth()
   const location = useLocation()
