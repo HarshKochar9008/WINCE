@@ -9,7 +9,7 @@ from .serializers import BookingSerializer
 
 
 class BookingThrottle(throttling.UserRateThrottle):
-    rate = "10/minute"
+    rate = "60/minute"
 
 
 class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

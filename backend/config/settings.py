@@ -183,7 +183,9 @@ CSRF_TRUSTED_ORIGINS = [
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+# Set to unsafe-none to allow Google OAuth popup communication via postMessage
+# Google Identity Services requires this for cross-origin popup communication
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "unsafe-none"
 
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
 

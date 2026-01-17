@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function apiFetch<T = unknown>(
     path: string,
     init: RequestInit = {},
-    opts: { skipAuth?: boolean } = {},
+    opts: { skipAuth?: boolean; customToken?: string } = {},
   ): Promise<T> {
     const headers = new Headers(init.headers)
     if (init.body && !headers.has('Content-Type')) {
@@ -100,7 +100,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers.set('Content-Type', 'application/json')
       }
     }
-    if (!opts.skipAuth && accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
+    const tokenToUse = opts.customToken ?? accessToken
+    if (!opts.skipAuth && tokenToUse) headers.set('Authorization', `Bearer ${tokenToUse}`)
 
     const doFetch = () => fetch(joinUrl(API_BASE_URL, path), { ...init, headers })
 
@@ -139,8 +140,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return body as T
   }
 
-  async function fetchMe() {
-    const me = await apiFetch<User>('/api/users/me/', { method: 'GET' })
+  async function fetchMe(token?: string) {
+    const me = await apiFetch<User>('/api/users/me/', { method: 'GET' }, token ? { customToken: token } : {})
     setUser(me)
   }
 
@@ -168,7 +169,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { skipAuth: true },
     )
     persistTokens(data.access, data.refresh)
-    await fetchMe()
+    // Use the token directly to avoid race condition with state update
+    await fetchMe(data.access)
   }
 
   async function googleLogin(credential: string): Promise<User> {
@@ -189,6 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { skipAuth: true },
     )
     persistTokens(data.access, data.refresh)
+    // User data is already in response, no need to fetch again
     setUser(data.user)
     return data.user
   }
@@ -200,6 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       { skipAuth: true },
     )
     persistTokens(data.access, data.refresh)
+    // User data is already in response, no need to fetch again
     setUser(data.user)
   }
 
