@@ -145,7 +145,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
 
   return (
     <div className="session-calendar">
-      {/* Calendar Header */}
+      {
       <div className="calendar-header">
         <div className="calendar-header-left">
           <h2 className="calendar-title">
@@ -169,7 +169,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {/* Legend */}
+      {
       <div className="calendar-legend">
         <div className="legend-item">
           <span className="legend-dot booked"></span>
@@ -181,21 +181,21 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {
       <div className="calendar-grid">
-        {/* Day names */}
+        {
         {dayNames.map((day) => (
           <div key={day} className="calendar-day-name">
             {day}
           </div>
         ))}
 
-        {/* Empty cells before first day */}
+        {
         {Array.from({ length: startingDayOfWeek }).map((_, index) => (
           <div key={`empty-${index}`} className="calendar-day empty"></div>
         ))}
 
-        {/* Days */}
+        {
         {Array.from({ length: daysInMonth }).map((_, index) => {
           const day = index + 1
           const dayEvents = getEventsForDay(day)
@@ -245,7 +245,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         })}
       </div>
 
-      {/* Event Detail Modal */}
+      {
       {selectedEvent && (
         <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="event-modal" onClick={(e) => e.stopPropagation()}>
