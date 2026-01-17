@@ -5,7 +5,6 @@ from sessions.serializers import SessionSerializer
 
 from .models import Booking
 
-
 class BookingSerializer(serializers.ModelSerializer):
     session_id = serializers.PrimaryKeyRelatedField(source="session", queryset=Session.objects.all(), write_only=True)
     session = SessionSerializer(read_only=True)
@@ -32,9 +31,7 @@ class BookingSerializer(serializers.ModelSerializer):
         user = getattr(request, "user", None)
         if not user:
             raise serializers.ValidationError({"detail": "Authentication required."})
-        # Only creators can book sessions
-        if getattr(user, "role", None) != "CREATOR":
-            raise serializers.ValidationError({"detail": "Only creators can book sessions."})
+
         if session and session.creator_id == user.id:
             raise serializers.ValidationError({"session_id": "You cannot book your own session."})
         return attrs

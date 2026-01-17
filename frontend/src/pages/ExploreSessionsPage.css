@@ -250,7 +250,7 @@
   font-style: italic;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 640px) {
   .explore-sessions-page {
     padding: 24px 0;

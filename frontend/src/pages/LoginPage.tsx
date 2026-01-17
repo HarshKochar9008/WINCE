@@ -57,7 +57,7 @@ export function LoginPage() {
           setGoogleError(null)
           const me = await googleLogin(response.credential)
           const target = me.role === 'CREATOR' ? '/creator' : '/dashboard'
-          // If the route we came from is allowed for this role, honor it; otherwise role-based target.
+          
           const requested = typeof from === 'string' ? from : null
           const finalTarget =
             requested && (requested.startsWith('/creator') ? me.role === 'CREATOR' : true) ? requested : target
@@ -79,17 +79,17 @@ export function LoginPage() {
     })
   }, [from, googleClientId, googleLogin, navigate])
 
-  // Handle GitHub OAuth callback
+  
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const state = urlParams.get('state')
     
     if (code && state === 'github_oauth') {
-      // Clean up URL
+      
       window.history.replaceState({}, document.title, window.location.pathname)
       
-      // Exchange code for JWT
+      
       ;(async () => {
         try {
           setGitHubError(null)

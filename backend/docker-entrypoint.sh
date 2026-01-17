@@ -1,4 +1,4 @@
-#!/bin/sh
+
 set -e
 
 if [ -n "${POSTGRES_HOST:-}" ]; then

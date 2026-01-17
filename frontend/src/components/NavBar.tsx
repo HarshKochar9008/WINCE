@@ -49,19 +49,19 @@ function AvatarDropdown() {
 
   const getAvatarSrc = () => {
     if (user?.avatar) {
-      // Skip URLs (like Google profile photos) - only use local avatar paths
+      
       if (user.avatar.startsWith('http://') || user.avatar.startsWith('https://')) {
-        // Return default avatar instead of Google profile photo
+        
         return '/Avatar/Avatar 1.png'
       }
-      // If avatar is a path, ensure it starts with /
+      
       if (user.avatar.startsWith('/Avatar/') || user.avatar.startsWith('Avatar/')) {
         return user.avatar.startsWith('/') ? user.avatar : `/${user.avatar}`
       }
-      // Otherwise, assume it's a relative path
+      
       return user.avatar.startsWith('/') ? user.avatar : `/${user.avatar}`
     }
-    // Default avatar
+    
     return '/Avatar/Avatar 1.png'
   }
 
@@ -172,7 +172,7 @@ export function NavBar() {
           <span className="navbar-brand-name">Ahoum</span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {
         <div className="nav-right">
           {user ? (
             <AvatarDropdown />
@@ -186,7 +186,7 @@ export function NavBar() {
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {
         <button 
           className="mobile-menu-button" 
           onClick={toggleMobileMenu}
@@ -196,7 +196,7 @@ export function NavBar() {
           {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
         </button>
 
-        {/* Mobile Menu */}
+        {
         <div 
           ref={mobileMenuRef}
           className={`mobile-menu ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}

@@ -1,4 +1,12 @@
 services:
+
+  - type: pspg
+    name: ahoum-postgres
+    plan: free
+    region: oregon
+    databaseName: ahoum
+    user: ahoum
+
   - type: web
     name: ahoum-backend
     env: python
@@ -7,11 +15,66 @@ services:
     buildCommand: |
       pip install -r backend/requirements.txt
       python backend/manage.py collectstatic --noinput
-      python backend/manage.py migrate
-    startCommand: gunicorn config.wsgi:application --chdir backend
+    startCommand: gunicorn config.wsgi:application --chdir backend --bind 0.0.0.0:$PORT
     autoDeploy: true
     envVars:
+
       - key: DJANGO_DEBUG
         value: "0"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
       - key: DJANGO_ALLOWED_HOSTS
         value: "*"
+
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: ahoum-postgres
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: ahoum-postgres
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: ahoum-postgres
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: ahoum-postgres
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: ahoum-postgres
+          property: password
+
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://wince.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://wince.vercel.app,http://localhost,http://127.0.0.1"
+
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_SECRET
+        sync: false
+
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PUBLISHABLE_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: "https://wince.vercel.app"
+
+      - key: USE_S3
+        value: "0"
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_ENDPOINT_URL
+        sync: false

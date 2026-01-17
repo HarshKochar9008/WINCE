@@ -56,7 +56,7 @@
   margin-bottom: 32px;
 }
 
-/* Header Section */
+
 .dashboard-header-section {
   margin-bottom: 32px;
   padding-bottom: 24px;
@@ -136,7 +136,7 @@
   transform: translateY(0);
 }
 
-/* Feature Cards */
+
 .dashboard-features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -232,7 +232,7 @@
   letter-spacing: -0.2px;
 }
 
-/* Become Creator Section */
+
 .dashboard-become-creator-section {
   background: linear-gradient(135deg, #667eea 0%, #e3c7ff 100%);
   border-radius: 16px;
@@ -311,7 +311,7 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Stats Section */
+
 .dashboard-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -370,7 +370,7 @@
   text-transform: uppercase;
 }
 
-/* Vertical Calendar Button */
+
 .vertical-calendar-btn {
   position: fixed;
   right: 0;
@@ -402,7 +402,7 @@
   letter-spacing: 2px;
 }
 
-/* Profile Section */
+
 .dashboard-profile-section {
   background: white;
   border-radius: 16px;
@@ -472,7 +472,7 @@
   letter-spacing: 1px;
 }
 
-/* Bookings Section */
+
 .dashboard-bookings-section {
   margin-bottom: 40px;
   padding: 0 48px;
@@ -573,7 +573,7 @@
   box-shadow: 0 2px 4px rgba(153, 27, 27, 0.1);
 }
 
-/* Quick Actions */
+
 .dashboard-quick-actions {
   display: flex;
   gap: 16px;
@@ -664,7 +664,7 @@
   display: inline-block;
 }
 
-/* Calendar Drawer Overlay */
+
 .calendar-drawer-overlay {
   position: fixed;
   top: 0;
@@ -689,7 +689,7 @@
   }
 }
 
-/* Calendar Drawer */
+
 .calendar-drawer {
   background: white;
   width: 100%;
@@ -756,20 +756,20 @@
   transform: rotate(90deg) scale(0.95);
 }
 
-/* Calendar Drawer Content */
+
 .calendar-drawer-content {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
 }
 
-/* Adjust calendar inside drawer */
+
 .calendar-drawer-content .session-calendar {
   margin: 0;
   box-shadow: none;
 }
 
-/* Responsive Design */
+
 @media (max-width: 1024px) {
   .dashboard-modern {
     margin-left: 0;

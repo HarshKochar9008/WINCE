@@ -33,7 +33,7 @@ export function LandingPage() {
           </header>
 
           <section ref={heroRef} className={`hero-section ${isVisible ? 'visible' : ''}`}>
-              {/* Decorative background elements */}
+              {
               <img src="/images/g108.png" alt="" className="decorative-cloud" />
               <img src="/images/g110.png" alt="" className="decorative-cloud1" />
               <img src="/images/path114.png" alt="" className="decorative-circle" />
@@ -60,42 +60,7 @@ export function LandingPage() {
           </section>
 
 
-{/* 
-
-      <section className="cta-section">
-        <div className="cta-content">
-          <h2 className="cta-title">Ready to Begin Your Journey?</h2>
-          <p className="cta-text">
-            Join thousands of seekers and creators on Ahoum today
-          </p>
-          <div className="cta-buttons">
-            <button className="cta-primary large" onClick={handleGetStarted}>
-              Get Started Free
-              <span className="cta-arrow"><FaArrowRight /></span>
-            </button>
-            <Link to="/sessions" className="cta-secondary large">
-              Browse Sessions
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      <footer className="landing-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <span className="brand-icon"><FaLeaf /></span>
-            Ahoum
-          </div>
-          <div className="footer-links">
-            <Link to="/sessions">Sessions</Link>
-            <Link to="/login">Login</Link>
-            <Link to="/signup">Sign Up</Link>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Ahoum. All rights reserved.</p>
-        </div>
-      </footer> */}
+{
     </div>
   )
 }

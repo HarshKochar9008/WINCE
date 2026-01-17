@@ -2,15 +2,48 @@ from django.conf import settings
 from rest_framework import mixins, status, throttling, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from decimal import Decimal
 
 from .models import Booking
 from .permissions import BookingPermission
 from .serializers import BookingSerializer
 
-
 class BookingThrottle(throttling.UserRateThrottle):
+    
     rate = "10/minute"
 
+    def allow_request(self, request, view):
+        
+
+        if request.method == 'POST':
+            session_id = None
+            try:
+
+                if hasattr(request, 'data'):
+                    session_id = request.data.get('session_id')
+
+                elif hasattr(request, 'body') and request.content_type == 'application/json':
+                    import json
+                    try:
+                        body_data = json.loads(request.body)
+                        session_id = body_data.get('session_id')
+                    except (json.JSONDecodeError, AttributeError):
+                        pass
+            except (AttributeError, TypeError):
+                pass
+
+            if session_id:
+                try:
+                    from sessions.models import Session
+                    session = Session.objects.get(id=session_id)
+
+                    if session.price == Decimal('0'):
+                        return True
+                except (Session.DoesNotExist, ValueError, TypeError):
+
+                    pass
+
+        return super().allow_request(request, view)
 
 class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = BookingSerializer
@@ -30,15 +63,14 @@ class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
         return context
 
     def perform_create(self, serializer):
-        """Create a booking, handling duplicate booking attempts gracefully"""
+        
         from django.db import IntegrityError
         from decimal import Decimal
         from rest_framework.exceptions import ValidationError
-        
+
         try:
             booking = serializer.save(user=self.request.user)
-            
-            # Auto-confirm free sessions (price = 0)
+
             if booking.session.price == Decimal('0'):
                 booking.status = Booking.Status.CONFIRMED
                 booking.payment_status = "free"
@@ -51,7 +83,7 @@ class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
 
     @action(detail=True, methods=["post"])
     def verify_payment(self, request, pk=None):
-        """Verify Stripe payment and update booking status"""
+        
         booking = self.get_object()
         if booking.user != request.user:
             return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
@@ -68,20 +100,17 @@ class BookingViewSet(mixins.CreateModelMixin, mixins.ListModelMixin, mixins.Retr
             import stripe
 
             stripe.api_key = settings.STRIPE_SECRET_KEY
-            
-            # Retrieve the checkout session from Stripe
+
             checkout_session = stripe.checkout.Session.retrieve(session_id)
 
-            # Verify the session belongs to this booking
             if str(checkout_session.client_reference_id) != str(booking.id):
                 return Response(
                     {"detail": "Session does not match booking."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Update booking based on payment status
             booking.payment_id = checkout_session.payment_intent
-            
+
             if checkout_session.payment_status == "paid":
                 booking.payment_status = "paid"
                 booking.amount_paid = booking.session.price

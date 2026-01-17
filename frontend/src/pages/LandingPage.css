@@ -1,4 +1,4 @@
-/* Landing Page Styles */
+
 .landing-page {
   min-height: 100vh;
   background: #0a0a0f;
@@ -7,7 +7,7 @@
   overflow-x: hidden;
 }
 
-/* Header */
+
 .landing-header {
   position: fixed;
   top: 0;
@@ -285,7 +285,7 @@
   font-weight: 500;
 }
 
-/* Hero Visual */
+
 .hero-visual {
   position: relative;
   height: 500px;
@@ -403,7 +403,7 @@
   pointer-events: none;
 }
 
-/* Features Section */
+
 .features-section {
   padding: 100px 40px;
   max-width: 1400px;
@@ -512,7 +512,7 @@
   margin: 0;
 }
 
-/* How It Works Section */
+
 .how-it-works-section {
   padding: 100px 40px;
   background: rgba(15, 15, 20, 0.5);
@@ -579,7 +579,7 @@
   transform: translateY(-50%);
 }
 
-/* CTA Section */
+
 .cta-section {
   padding: 120px 40px;
   text-align: center;
@@ -612,7 +612,7 @@
   flex-wrap: wrap;
 }
 
-/* Footer */
+
 .landing-footer {
   padding: 60px 40px 40px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -667,7 +667,7 @@
   margin: 0;
 }
 
-/* Responsive Design */
+
 @media (max-width: 1024px) {
   .hero-section {
     flex-direction: column;
@@ -780,7 +780,7 @@
   }
 }
 
-/* Scroll Animations */
+
 @media (prefers-reduced-motion: no-preference) {
   .feature-card,
   .step-card {

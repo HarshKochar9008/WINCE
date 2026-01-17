@@ -10,7 +10,6 @@ from .serializers import SessionSerializer
 
 logger = logging.getLogger(__name__)
 
-
 class SessionViewSet(viewsets.ModelViewSet):
     queryset = Session.objects.select_related("creator").all().order_by("-start_time")
     serializer_class = SessionSerializer
@@ -20,9 +19,9 @@ class SessionViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
-    
+
     def list(self, request, *args, **kwargs):
-        """Override list to add error handling."""
+        
         try:
             return super().list(request, *args, **kwargs)
         except Exception as e:
@@ -37,7 +36,7 @@ class SessionViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], parser_classes=[MultiPartParser, FormParser])
     def upload_image(self, request, pk=None):
-        """Upload image file for session"""
+        
         session = self.get_object()
         if session.creator != request.user:
             return Response(

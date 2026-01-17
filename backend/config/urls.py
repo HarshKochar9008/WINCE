@@ -5,14 +5,11 @@ from django.urls import include, path
 from rest_framework import throttling
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-
 class TokenObtainPairThrottle(throttling.AnonRateThrottle):
     rate = "5/minute"
 
-
 class ThrottledTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [TokenObtainPairThrottle]
-
 
 urlpatterns = [
     path("admin/", admin.site.urls),

@@ -1,4 +1,4 @@
-/* Creator Dashboard Styles - Matching the modern design */
+
 .creator-dashboard-modern {
   min-height: 100vh;
   background: #ffffff;
@@ -6,7 +6,7 @@
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
-/* Header Section */
+
 .creator-header-section {
   position: relative;
   background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
@@ -116,7 +116,7 @@
   transform: translateY(0);
 }
 
-/* Form Section */
+
 .creator-form-section {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -241,7 +241,7 @@
   color: #0066ff;
 }
 
-/* Stats Section */
+
 .creator-stats-section {
   background: #f8fafc;
   border-radius: 16px;
@@ -276,7 +276,7 @@
   font-weight: 500;
 }
 
-/* Sessions List */
+
 .creator-sessions-section {
   background: #f8fafc;
   border-radius: 16px;
@@ -378,7 +378,7 @@
   font-weight: 700;
 }
 
-/* Bookings List */
+
 .creator-bookings-section {
   background: #f8fafc;
   border-radius: 16px;
@@ -458,7 +458,7 @@
   color: #991b1b;
 }
 
-/* Alert Messages */
+
 .creator-alert {
   padding: 16px;
   border-radius: 12px;
@@ -484,14 +484,14 @@
   border: 1px solid #bae6fd;
 }
 
-/* Empty State */
+
 .creator-empty-state {
   text-align: center;
   padding: 48px 24px;
   color: #64748b;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .creator-dashboard-modern {
     padding: 16px;
@@ -532,7 +532,7 @@
   }
 }
 
-/* Floating Add Session Button */
+
 .creator-floating-add-button {
   position: fixed;
   bottom: 32px;
@@ -562,7 +562,7 @@
   transform: scale(0.95);
 }
 
-/* Floating Calendar Button for Creator */
+
 .creator-floating-calendar-btn {
   position: fixed;
   bottom: 110px;
@@ -592,7 +592,7 @@
   transform: scale(0.95);
 }
 
-/* Creator Calendar Drawer Overlay */
+
 .creator-calendar-drawer-overlay {
   position: fixed;
   top: 0;
@@ -616,7 +616,7 @@
   }
 }
 
-/* Creator Calendar Drawer */
+
 .creator-calendar-drawer {
   background: white;
   width: 100%;
@@ -638,7 +638,7 @@
   }
 }
 
-/* Creator Calendar Drawer Header */
+
 .creator-calendar-drawer-header {
   display: flex;
   justify-content: space-between;
@@ -679,20 +679,20 @@
   transform: rotate(90deg);
 }
 
-/* Creator Calendar Drawer Content */
+
 .creator-calendar-drawer-content {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
 }
 
-/* Adjust calendar inside drawer */
+
 .creator-calendar-drawer-content .creator-session-calendar {
   margin: 0;
   box-shadow: none;
 }
 
-/* Mobile Responsive for Creator Drawer */
+
 @media (max-width: 768px) {
   .creator-floating-calendar-btn {
     width: 56px;

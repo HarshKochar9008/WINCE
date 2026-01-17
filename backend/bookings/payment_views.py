@@ -1,6 +1,4 @@
-"""
-Payment views for creating Stripe Checkout Sessions
-"""
+
 from django.conf import settings
 from rest_framework import status, throttling
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -10,20 +8,14 @@ from rest_framework.response import Response
 from .models import Booking
 from .payments import create_stripe_checkout_session
 
-
 class PaymentThrottle(throttling.UserRateThrottle):
     rate = "10/minute"
-
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 @throttle_classes([PaymentThrottle])
 def create_payment_order(request):
-    """
-    Create a Stripe Checkout Session for a booking
-    Expects: { "booking_id": <id> }
-    Returns: { "session_id": "...", "url": "...", "publishable_key": "..." }
-    """
+    
     if not settings.STRIPE_SECRET_KEY:
         return Response(
             {"detail": "Payment gateway is not configured."},
@@ -51,7 +43,6 @@ def create_payment_order(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # Skip payment for free sessions
     from decimal import Decimal
     if booking.session.price == Decimal('0'):
         return Response(
@@ -60,10 +51,9 @@ def create_payment_order(request):
         )
 
     try:
-        # Get user information for Indian export compliance
-        # Indian regulations require customer name and address for export transactions
+
         checkout_session = create_stripe_checkout_session(
-            amount=booking.session.price, 
+            amount=booking.session.price,
             booking_id=booking.id,
             session_title=booking.session.title,
             customer_email=request.user.email,

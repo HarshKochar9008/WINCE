@@ -34,11 +34,11 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
 
-  // Convert bookings and sessions to calendar events
+  
   const events = useMemo(() => {
     const calendarEvents: CalendarEvent[] = []
     
-    // Add booked sessions
+    
     bookings.forEach((booking) => {
       const session = typeof booking.session === 'object' ? booking.session : null
       if (session) {
@@ -56,7 +56,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
       }
     })
 
-    // Add available sessions (not booked)
+    
     const bookedSessionIds = new Set(
       bookings
         .map(b => typeof b.session === 'object' ? b.session.id : b.session)
@@ -80,7 +80,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
     return calendarEvents
   }, [bookings, sessions])
 
-  // Calendar calculations
+  
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   
@@ -96,7 +96,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-  // Get events for a specific day
+  
   const getEventsForDay = (day: number) => {
     return events.filter((event) => {
       const eventDate = event.startTime
@@ -108,7 +108,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
     })
   }
 
-  // Navigation
+  
   const goToPreviousMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1))
   }
@@ -121,7 +121,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
     setCurrentDate(new Date())
   }
 
-  // Format duration
+  
   const formatDuration = (duration: string) => {
     const match = duration.match(/(\d+):(\d+):(\d+)/)
     if (match) {
@@ -133,7 +133,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
     return duration
   }
 
-  // Check if date is today
+  
   const isToday = (day: number) => {
     const today = new Date()
     return (
@@ -145,7 +145,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
 
   return (
     <div className="session-calendar">
-      {/* Calendar Header */}
+      {
       <div className="calendar-header">
         <div className="calendar-header-left">
           <h2 className="calendar-title">
@@ -169,7 +169,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {/* Legend */}
+      {
       <div className="calendar-legend">
         <div className="legend-item">
           <span className="legend-dot booked"></span>
@@ -181,21 +181,21 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         </div>
       </div>
 
-      {/* Calendar Grid */}
+      {
       <div className="calendar-grid">
-        {/* Day names */}
+        {
         {dayNames.map((day) => (
           <div key={day} className="calendar-day-name">
             {day}
           </div>
         ))}
 
-        {/* Empty cells before first day */}
+        {
         {Array.from({ length: startingDayOfWeek }).map((_, index) => (
           <div key={`empty-${index}`} className="calendar-day empty"></div>
         ))}
 
-        {/* Days */}
+        {
         {Array.from({ length: daysInMonth }).map((_, index) => {
           const day = index + 1
           const dayEvents = getEventsForDay(day)
@@ -245,7 +245,7 @@ export function SessionCalendar({ bookings, sessions }: SessionCalendarProps) {
         })}
       </div>
 
-      {/* Event Detail Modal */}
+      {
       {selectedEvent && (
         <div className="event-modal-overlay" onClick={() => setSelectedEvent(null)}>
           <div className="event-modal" onClick={(e) => e.stopPropagation()}>

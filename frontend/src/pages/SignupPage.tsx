@@ -48,10 +48,10 @@ export function SignupPage() {
       let msg = 'Signup failed'
       if (err && typeof err === 'object' && 'details' in err) {
         const details = (err as any).details
-        // Check if there are validation errors
+        
         if (details && typeof details === 'object' && 'errors' in details) {
           const errors = details.errors
-          // Extract first error from each field
+          
           const errorMessages = Object.entries(errors)
             .map(([field, messages]) => {
               const msgList = Array.isArray(messages) ? messages : [messages]
@@ -86,7 +86,7 @@ export function SignupPage() {
           setGoogleError(null)
           const me = await googleLogin(response.credential)
           const target = me.role === 'CREATOR' ? '/creator' : '/dashboard'
-          // If the route we came from is allowed for this role, honor it; otherwise role-based target.
+          
           const requested = typeof from === 'string' ? from : null
           const finalTarget =
             requested && (requested.startsWith('/creator') ? me.role === 'CREATOR' : true) ? requested : target
@@ -108,17 +108,17 @@ export function SignupPage() {
     })
   }, [from, googleClientId, googleLogin, navigate])
 
-  // Handle GitHub OAuth callback
+  
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const code = urlParams.get('code')
     const state = urlParams.get('state')
     
     if (code && state === 'github_oauth') {
-      // Clean up URL
+      
       window.history.replaceState({}, document.title, window.location.pathname)
       
-      // Exchange code for JWT
+      
       ;(async () => {
         try {
           setGitHubError(null)

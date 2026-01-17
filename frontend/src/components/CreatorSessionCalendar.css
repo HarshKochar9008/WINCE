@@ -7,7 +7,7 @@
   margin: 32px 0;
 }
 
-/* Header */
+
 .creator-calendar-header {
   display: flex;
   justify-content: space-between;
@@ -89,7 +89,7 @@
   transform: scale(1.1);
 }
 
-/* Legend */
+
 .creator-calendar-legend {
   display: flex;
   gap: 24px;
@@ -123,7 +123,7 @@
   box-shadow: 0 2px 8px rgba(107, 107, 107, 0.4);
 }
 
-/* Calendar Grid */
+
 .creator-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -247,7 +247,7 @@
   margin-top: 2px;
 }
 
-/* Event Modal */
+
 .creator-event-modal-overlay {
   position: fixed;
   top: 0;
@@ -436,7 +436,7 @@
   box-shadow: 0 6px 24px rgba(79, 172, 254, 0.4);
 }
 
-/* Responsive Design */
+
 @media (max-width: 1024px) {
   .creator-session-calendar {
     padding: 24px;
