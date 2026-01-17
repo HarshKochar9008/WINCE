@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -173,6 +174,9 @@ CSRF_TRUSTED_ORIGINS = [
     if o.strip()
 ]
 
+# Respect proxy headers from Render/other PaaS providers.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Google Identity Services (frontend receives an ID token, backend verifies and exchanges for our JWT)
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
 
@@ -205,3 +209,9 @@ if USE_S3:
     AWS_S3_USE_SSL = os.getenv("AWS_S3_USE_SSL", "1") == "1"
     AWS_S3_VERIFY = os.getenv("AWS_S3_VERIFY", "1") == "1"
     AWS_DEFAULT_ACL = "public-read"
+else:
+    STORAGES = {
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        }
+    }
