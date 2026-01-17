@@ -141,11 +141,26 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
-CORS_ALLOWED_ORIGINS = [
-    o.strip()
-    for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173").split(",")
-    if o.strip()
-]
+def _parse_cors_origins(origins_str: str) -> list[str]:
+    """Parse CORS origins, stripping any paths from URLs."""
+    from urllib.parse import urlparse
+    origins = []
+    for origin in origins_str.split(","):
+        origin = origin.strip()
+        if not origin:
+            continue
+        # Parse URL and reconstruct just scheme://host:port
+        parsed = urlparse(origin)
+        if parsed.scheme and parsed.netloc:
+            # Reconstruct origin without path
+            origin_clean = f"{parsed.scheme}://{parsed.netloc}"
+            if origin_clean not in origins:
+                origins.append(origin_clean)
+    return origins
+
+CORS_ALLOWED_ORIGINS = _parse_cors_origins(
+    os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+)
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
