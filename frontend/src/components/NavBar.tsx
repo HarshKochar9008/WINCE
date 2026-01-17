@@ -166,7 +166,7 @@ export function NavBar() {
 
   return (
     <header className="navbar">
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginRight: '160px' }} className="navbar-inner">
+      <div className="navbar-inner">
         <Link to="/" className="navbar-brand" onClick={closeMobileMenu}>
           <img style={{ width: '40px', height: '40px' }} src="/images/logo.png" alt="Ahoum Logo" className="navbar-logo" />
           <span className="navbar-brand-name">Ahoum</span>

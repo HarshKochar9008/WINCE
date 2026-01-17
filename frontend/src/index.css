@@ -69,7 +69,6 @@ a {
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
-  margin-right: 160px;
 }
 
 .brand {
@@ -100,6 +99,9 @@ a {
 
 .navbar-brand-name {
   letter-spacing: 0.2px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 .nav {
@@ -127,6 +129,7 @@ a {
   justify-content: center;
   border-radius: 8px;
   transition: background-color 0.2s;
+  flex-shrink: 0;
 }
 
 .mobile-menu-button:hover {
@@ -224,6 +227,8 @@ a {
 
   .mobile-menu-button {
     display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .mobile-menu {
